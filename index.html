@@ -7,7 +7,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Teachers:wght@400;500;600;700;800&family=Patrick+Hand&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Teachers:wght@400;500;600;700;800&family=Patrick+Hand&family=Fredoka:wght@700&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -75,7 +75,21 @@
     }
     .app-logo    { line-height: 1; margin-bottom: 14px; }
     .abc-logo-svg { width: 170px; height: auto; filter: drop-shadow(0 6px 20px rgba(0,0,0,.4)); display: block; margin: 0 auto; }
-    .app-title   { font-size: 2.4rem; font-weight: 900; color: #fff; letter-spacing: 1px; text-transform: uppercase; }
+    .app-title {
+      font-family: 'Fredoka', 'Teachers', sans-serif; font-size: clamp(2rem, 11vw, 2.8rem); font-weight: 700;
+      color: #fff; letter-spacing: 2px; text-transform: uppercase; line-height: 1.1;
+      text-shadow: 0 4px 0 #4c1d95, 0 8px 18px rgba(0,0,0,.35);
+    }
+    .app-title .w span { display: inline-block; transition: transform .2s; }
+    .app-title .w span:nth-child(odd)  { color: #fde68a; transform: rotate(-5deg) translateY(-2px); }
+    .app-title .w span:nth-child(even) { color: #fff;    transform: rotate(4deg)  translateY(2px); }
+    .app-title .w span:nth-child(3n)   { color: #fbcfe8; }
+    .app-title .w { white-space: nowrap; display: inline-block; }
+    .app-title .space { width: .4em; }
+    .app-title:hover .w span { transform: rotate(0) translateY(0); }
+    @keyframes rocketFloat { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-8px) } }
+    .abc-logo-svg { animation: rocketFloat 3s ease-in-out infinite; }
+    @media (prefers-reduced-motion: reduce) { .abc-logo-svg { animation: none; } }
     .app-tagline { font-size: .95rem; color: rgba(255,255,255,.75); font-weight: 600; margin-top: 4px; letter-spacing: .08em; }
     .section-heading {
       font-size: 1rem; font-weight: 800; text-transform: uppercase;
@@ -1048,7 +1062,7 @@
     <rect x="-36" y="60" width="72" height="12" rx="4" fill="#4c1d95"/>
   </g>
 </svg></div>
-      <h1 class="app-title">Word Rocket</h1>
+      <h1 class="app-title"><span class="w"><span>W</span><span>o</span><span>r</span><span>d</span></span> <span class="w"><span>R</span><span>o</span><span>c</span><span>k</span><span>e</span><span>t</span></span></h1>
       <p class="app-tagline">🚀 Sight word practice</p>
       <div style="display:flex;gap:8px;justify-content:center;align-items:center;">
         <button class="btn-settings btn-info" onclick="showInfo()" title="How this app works">ⓘ</button>
