@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>Fry Words – Fluent Reading</title>
+  <title>Word Rocket</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,15 +11,15 @@
 
   <style>
     :root {
-      --bg:          #0f0f1a;
-      --surface:     #1a1a2e;
-      --surface2:    #232338;
-      --border:      #2e2e4a;
-      --text:        #f0f0ff;
-      --soft:        #9090b8;
-      --accent:      #0d9488;
-      --accent-dk:   #0f766e;
-      --accent2:     #5eead4;
+      --bg:          #140f33;
+      --surface:     #221a4d;
+      --surface2:    #2d2363;
+      --border:      #3b2f7a;
+      --text:        #f5f0ff;
+      --soft:        #a89ccf;
+      --accent:      #7c3aed;
+      --accent-dk:   #6d28d9;
+      --accent2:     #f0abfc;
       --green:       #22c55e;
       --green-dk:    #16a34a;
       --green-bg:    #14291e;
@@ -29,19 +29,31 @@
       --amber:       #f59e0b;
       --amber-dk:    #d97706;
       --amber-bg:    #2a1f00;
-      --gray:        #6060a0;
-      --gray-bg:     #1a1a2e;
+      --gray:        #6b5bb0;
+      --gray-bg:     #221a4d;
       --radius:      16px;
-      --shadow:      0 4px 24px rgba(155,93,229,.15);
+      --shadow:      0 4px 24px rgba(139,92,246,.2);
       --shadow-card: 0 8px 32px rgba(0,0,0,.4);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background:
+        radial-gradient(1.5px 1.5px at 20px 30px, #fff 50%, transparent 60%),
+        radial-gradient(1px 1px at 120px 90px, #fde68a 50%, transparent 60%),
+        radial-gradient(1.5px 1.5px at 220px 50px, #fff 50%, transparent 60%),
+        radial-gradient(1px 1px at 80px 170px, #c4b5fd 50%, transparent 60%),
+        radial-gradient(2px 2px at 300px 140px, #fff 50%, transparent 60%),
+        radial-gradient(1px 1px at 260px 230px, #fde68a 50%, transparent 60%),
+        radial-gradient(1.5px 1.5px at 170px 280px, #fff 50%, transparent 60%);
+      background-size: 340px 320px; opacity: .55;
+    }
     html, body {
       height: 100%;
       font-family: 'Teachers', sans-serif;
-      background: #0f0f1a;
+      background: #140f33;
       color: var(--text);
       -webkit-font-smoothing: antialiased;
     }
@@ -56,7 +68,7 @@
     /* ── HOME ── */
     .home-header {
       text-align: center;
-      background: linear-gradient(160deg, #0f766e 0%, #0d9488 50%, #5eead4 100%);
+      background: linear-gradient(160deg, #6d28d9 0%, #7c3aed 50%, #f0abfc 100%);
       margin: -24px -20px 28px;
       padding: 48px 24px 40px;
       border-radius: 0 0 32px 32px;
@@ -88,23 +100,23 @@
     .student-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
     .student-item {
       display: flex; align-items: center; justify-content: space-between;
-      background: #d6f3ef; border: 2px solid #a8e6dc;
+      background: #ede9fe; border: 2px solid #c4b5fd;
       border-radius: var(--radius); padding: 5px 16px;
       box-shadow: 0 2px 12px rgba(0,0,0,.15); transition: border-color .2s, box-shadow .2s; cursor: pointer;
     }
-    .student-item:hover { border-color: var(--accent); box-shadow: 0 4px 16px rgba(124,58,237,.2); }
+    .student-item:hover { border-color: var(--accent); box-shadow: 0 4px 16px rgba(139,92,246,.2); }
     .student-left  { display: flex; flex-direction: column; gap: 4px; flex: 1; }
-    .student-name  { font-size: 1.15rem; font-weight: 500; color: #1a1a2e; }
+    .student-name  { font-size: 1.15rem; font-weight: 500; color: #221a4d; }
     .progress-badge { font-size: .7rem; font-weight: 800; padding: 2px 9px; border-radius: 100px; letter-spacing: .03em; margin-top: 2px; display: inline-block; background: #e0eaff; color: #3b5bdb; }
     .student-arrow { font-size: 1.3rem; color: var(--accent); margin-left: 8px; }
     .btn-customize-inline {
-      background: none; border: none; color: #9090b8;
+      background: none; border: none; color: #a89ccf;
       font-size: 1rem; cursor: pointer; padding: 4px 8px;
       border-radius: 8px; transition: color .2s, background .2s;
     }
-    .btn-customize-inline:hover { color: var(--accent); background: #e6f9f6; }
+    .btn-customize-inline:hover { color: var(--accent); background: #f3e8ff; }
     .btn-delete {
-      background: none; border: none; color: #9090b8;
+      background: none; border: none; color: #a89ccf;
       font-size: 1.1rem; cursor: pointer; padding: 4px 8px;
       border-radius: 8px; transition: color .2s, background .2s; margin-left: 4px;
     }
@@ -114,7 +126,7 @@
     /* ── DASHBOARD ── */
     .dash-topbar {
       display: flex; align-items: center; gap: 12px;
-      background: linear-gradient(135deg, #0f766e, #5eead4);
+      background: linear-gradient(135deg, #6d28d9, #f0abfc);
       margin: -24px -20px 24px;
       padding: 20px 20px 20px;
       border-radius: 0 0 24px 24px;
@@ -124,22 +136,22 @@
     .dash-topbar .btn-back { border-color: rgba(255,255,255,.3); color: #fff; }
     .dash-topbar .btn-back:hover { border-color: #fff; }
     .points-section {
-      background: #1a1a2e;
+      background: #221a4d;
       border-radius: 16px;
       padding: 14px 20px; margin-bottom: 22px;
       box-shadow: 0 4px 24px rgba(0,0,0,.4);
-      border: 2px solid #2e2e4e;
+      border: 2px solid #3b2f7a;
     }
     .points-body {
       display: flex; align-items: center; gap: 20px;
     }
     .points-label { font-size: .75rem; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; display: block; margin-bottom: 8px; }
     .letter-status-card {
-      background: #3d3d6b; border-radius: 16px;
+      background: #2d2363; border-radius: 16px;
       padding: 14px 16px; margin-bottom: 20px;
-      border: 2px solid #4e4e80;
+      border: 2px solid #4c3d8f;
     }
-    .grid-label { font-size: .8rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #d8d8f0; margin-bottom: 10px; }
+    .grid-label { font-size: .8rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #e4ddff; margin-bottom: 10px; }
     .word-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
     .word-pill {
       padding: 4px 10px; border-radius: 8px;
@@ -148,7 +160,7 @@
     }
     .word-pill.known    { background: var(--green); color: #06210f; }
     .word-pill.learning { background: var(--amber); color: #2a1a00; }
-    .word-pill.unseen   { background: #4a4a80; color: #d8d8f0; opacity: .6; }
+    .word-pill.unseen   { background: #4c3d8f; color: #e4ddff; opacity: .6; }
     .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: .78rem; font-weight: 700; color: var(--soft); margin-bottom: 24px; }
     .ldot { width: 11px; height: 11px; border-radius: 4px; display: inline-block; margin-right: 4px; vertical-align: middle; }
     .ldot.known    { background: var(--green); }
@@ -202,7 +214,7 @@
     }
     .card-word-text {
       font-size: clamp(2.4rem, 12vw, 4.2rem); font-family: 'Teachers', sans-serif;
-      font-weight: 700; color: #1a1a2e; user-select: none; line-height: 1;
+      font-weight: 700; color: #221a4d; user-select: none; line-height: 1;
       text-align: center; word-break: break-word;
     }
 
@@ -239,7 +251,7 @@
       display: flex; flex-direction: column; align-items: center;
       padding-top: 28px; gap: 14px;
     }
-    #screen-results { background: #0f0f1a; }
+    #screen-results { background: #140f33; }
     .res-emoji { font-size: 3.8rem; line-height: 1; }
     .res-name  { font-size: 1rem; font-weight: 700; color: var(--soft); }
     .breakdown  { width: 100%; max-width: 400px; }
@@ -260,7 +272,7 @@
       font-size: 1rem; font-family: 'Teachers', sans-serif; font-weight: 800;
       cursor: pointer; text-align: center; transition: background .2s; width: 100%;
     }
-    .btn-secondary:hover { background: #e6f9f6; }
+    .btn-secondary:hover { background: #f3e8ff; }
     .btn-back {
       background: none; border: 2px solid var(--border); color: var(--soft);
       padding: 10px 16px; border-radius: var(--radius);
@@ -310,13 +322,13 @@
     .prompt-word {
       font-size: clamp(2.2rem, 10vw, 3.2rem); font-weight: 700; line-height: 1;
       font-family: 'Teachers', sans-serif;
-      color: #1a1a2e; margin-bottom: 16px; word-break: break-word;
+      color: #221a4d; margin-bottom: 16px; word-break: break-word;
     }
     .prompt-instruction {
       font-size: .95rem; font-weight: 600; color: #134e4a;
       line-height: 1.6; margin-bottom: 14px; text-align: center;
     }
-    .prompt-instruction strong { color: #0f766e; font-weight: 700; }
+    .prompt-instruction strong { color: #6d28d9; font-weight: 700; }
     .btn-confirm {
       display: inline-block; padding: 14px 28px;
       background: var(--accent); color: #fff; border: none;
@@ -349,31 +361,31 @@
       text-align: center; box-shadow: 0 12px 48px rgba(0,0,0,.3);
     }
     .pause-icon  { font-size: 3rem; line-height: 1; margin-bottom: 12px; }
-    .pause-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 24px; color:#1a1a2e; }
+    .pause-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 24px; color:#221a4d; }
 
     /* ── DAILY STREAK ── */
     .streak-section {
-      background: #3d3d6b; border-radius: 16px;
+      background: #2d2363; border-radius: 16px;
       padding: 14px 16px; margin-bottom: 20px;
-      border: 2px solid #4e4e80;
+      border: 2px solid #4c3d8f;
     }
     .streak-header {
       display: flex; align-items: baseline; justify-content: space-between;
       margin-bottom: 10px;
     }
-    .streak-label { font-size: .8rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #d8d8f0; }
+    .streak-label { font-size: .8rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: #e4ddff; }
     .streak-count { font-size: 1.1rem; font-weight: 900; color: var(--accent); }
     .streak-dots  { display: flex; gap: 6px; flex-wrap: wrap; }
     .streak-dot {
       width: 34px; height: 34px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       font-size: .7rem; font-weight: 800; letter-spacing: 0;
-      border: 2px solid var(--border); background: #12122a; color: var(--gray);
+      border: 2px solid var(--border); background: #1a1340; color: var(--gray);
       transition: transform .15s;
     }
     .streak-dot.practiced   { background: var(--accent); border-color: var(--accent2); color: #fff; }
     .streak-dot.today       { background: var(--green);  border-color: var(--green-dk);  color: #fff; transform: scale(1.12); }
-    .streak-dot.today-empty { border: 2px dashed var(--accent); color: var(--accent); background: #e6f9f6; transform: scale(1.12); }
+    .streak-dot.today-empty { border: 2px dashed var(--accent); color: var(--accent); background: #f3e8ff; transform: scale(1.12); }
     .streak-message { font-size: .85rem; font-weight: 600; color: var(--soft); margin-top: 10px; text-align: center; }
     .streak-message strong { color: var(--text); }
 
@@ -391,7 +403,7 @@
     }
     .pts-earned-number {
       font-size: 8rem; font-weight: 900; line-height: 1;
-      background: linear-gradient(135deg, #5eead4, #22c55e);
+      background: linear-gradient(135deg, #f0abfc, #22c55e);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       animation: popIn .55s cubic-bezier(.175,.885,.32,1.275) both;
       filter: drop-shadow(0 0 18px rgba(155,93,229,.5));
@@ -405,7 +417,7 @@
       50%      { filter: drop-shadow(0 0 36px rgba(155,93,229,.9)); }
     }
     .pts-earned-unit {
-      font-size: 1.2rem; font-weight: 800; color: #5eead4;
+      font-size: 1.2rem; font-weight: 800; color: #f0abfc;
       margin-top: -6px;
     }
     .pts-total-row {
@@ -548,18 +560,18 @@
 
     .pie-svg   { width: 88px; height: 88px; transform: rotate(-90deg); flex-shrink: 0; }
     .pie-pts-big {
-      font-size: 2.8rem; font-weight: 700; color: #9090b8;
+      font-size: 2.8rem; font-weight: 700; color: #a89ccf;
       line-height: 1; letter-spacing: -1px;
     }
     .res-pie-wrap {
       display: flex; align-items: center; gap: 16px;
-      background: #6060a8; border-radius: 16px;
+      background: #5b4bb5; border-radius: 16px;
       padding: 14px 22px; margin: 4px 0 16px;
       border: 2px solid #7878c0; width: 100%; max-width: 320px;
     }
     .res-pie-svg { width: 72px; height: 72px; transform: rotate(-90deg); flex-shrink: 0; }
     .res-pie-label { display: flex; flex-direction: column; gap: 2px; }
-    .res-pie-pct { font-size: 2rem; font-weight: 900; color: #5eead4; line-height: 1; }
+    .res-pie-pct { font-size: 2rem; font-weight: 900; color: #f0abfc; line-height: 1; }
     .res-pie-sub { font-size: .75rem; font-weight: 700; color: var(--soft); text-transform: uppercase; letter-spacing: .06em; }
 
     /* ── BEGIN PRACTICE button ── */
@@ -605,23 +617,23 @@
     }
     .duration-overlay.visible { display: flex; }
     .duration-box {
-      background: #1a1a2e; border-radius: 24px;
+      background: #221a4d; border-radius: 24px;
       padding: 32px 28px; max-width: 300px; width: 90%;
       text-align: center; box-shadow: 0 12px 48px rgba(0,0,0,.5);
-      border: 2px solid #2e2e4a;
+      border: 2px solid #3b2f7a;
     }
     .duration-title {
-      font-size: 1.2rem; font-weight: 900; color: #f0f0ff;
+      font-size: 1.2rem; font-weight: 900; color: #f5f0ff;
       margin-bottom: 22px; text-transform: uppercase; letter-spacing: .08em;
     }
     .duration-btns { display: flex; gap: 8px; justify-content: center; margin-bottom: 18px; }
     .btn-duration {
       flex: 1; padding: 18px 8px;
-      background: linear-gradient(135deg, #0f766e, #5eead4);
+      background: linear-gradient(135deg, #6d28d9, #f0abfc);
       border: none; border-radius: 16px;
       display: flex; flex-direction: column; align-items: center; gap: 2px;
       cursor: pointer; transition: opacity .2s, transform .1s;
-      box-shadow: 0 4px 14px rgba(124,58,237,.4);
+      box-shadow: 0 4px 14px rgba(139,92,246,.4);
     }
     .btn-duration:hover  { opacity: .88; }
     .btn-duration:active { transform: scale(.94); }
@@ -633,7 +645,7 @@
       font-weight: 700; cursor: pointer; padding: 6px 12px;
       transition: color .2s;
     }
-    .btn-dur-cancel:hover { color: #f0f0ff; }
+    .btn-dur-cancel:hover { color: #f5f0ff; }
 
     .btn-print {
       padding: 9px 16px; background: var(--surface2);
@@ -663,7 +675,7 @@
     }
     .notes-label {
       font-size: .8rem; font-weight: 800; text-transform: uppercase;
-      letter-spacing: .08em; color: #d8d8f0;
+      letter-spacing: .08em; color: #e4ddff;
     }
     .btn-notes-save {
       padding: 6px 14px; background: var(--accent);
@@ -673,7 +685,7 @@
     }
     .btn-notes-save:hover { opacity: .85; }
     .notes-input {
-      width: 100%; background: #12122a; border: 1.5px solid var(--border);
+      width: 100%; background: #1a1340; border: 1.5px solid var(--border);
       border-radius: 10px; padding: 10px 12px;
       font-family: 'Teachers', sans-serif; font-size: .9rem; font-weight: 500;
       color: var(--text); resize: none; outline: none;
@@ -684,7 +696,7 @@
 
     .notes-log { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
     .note-entry {
-      background: #12122a; border-radius: 10px;
+      background: #1a1340; border-radius: 10px;
       padding: 10px 12px; border-left: 3px solid var(--accent);
       position: relative;
     }
@@ -713,7 +725,7 @@
     /* ── SETTINGS SCREEN ── */
     .settings-topbar {
       display: flex; align-items: center; gap: 12px;
-      background: linear-gradient(135deg, #0f766e, #5eead4);
+      background: linear-gradient(135deg, #6d28d9, #f0abfc);
       margin: -24px -20px 22px; padding: 20px;
       border-radius: 0 0 24px 24px;
     }
@@ -738,20 +750,88 @@
     .settings-words { display: flex; flex-wrap: wrap; gap: 6px; }
     .drag-tile {
       padding: 10px 14px; border-radius: 10px;
-      background: linear-gradient(135deg, #0f766e, #0d9488);
+      background: linear-gradient(135deg, #6d28d9, #7c3aed);
       color: #fff; font-size: .95rem; font-weight: 900;
       display: flex; align-items: center; justify-content: center;
       cursor: grab; user-select: none; white-space: nowrap;
       transition: transform .15s, box-shadow .15s, opacity .15s;
-      box-shadow: 0 2px 8px rgba(124,58,237,.3);
+      box-shadow: 0 2px 8px rgba(139,92,246,.3);
       touch-action: none;
     }
-    .drag-tile:active { cursor: grabbing; transform: scale(1.08); box-shadow: 0 6px 18px rgba(124,58,237,.5); }
+    .drag-tile:active { cursor: grabbing; transform: scale(1.08); box-shadow: 0 6px 18px rgba(139,92,246,.5); }
     .drag-tile.dragging { opacity: .45; transform: scale(0.95); }
-    .drag-tile.drag-over { transform: scale(1.1); box-shadow: 0 0 0 3px #5eead4; }
+    .drag-tile.drag-over { transform: scale(1.1); box-shadow: 0 0 0 3px #f0abfc; }
 
     .settings-actions { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
     .settings-note { font-size: .75rem; color: var(--soft); font-weight: 600; text-align: center; line-height: 1.5; }
+
+    /* -- Choose words (home practice) -- */
+    .focus-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+    .focus-row .grid-label { margin-bottom: 0; }
+    .btn-choose {
+      padding: 9px 14px; background: #fbbf24; color: #2a1a00; border: none; border-radius: 12px;
+      font-family: 'Teachers', sans-serif; font-size: .85rem; font-weight: 800; cursor: pointer;
+    }
+    .btn-choose:active { transform: scale(.96); }
+    .focus-summary { font-size: .8rem; font-weight: 700; color: #e4ddff; margin-bottom: 10px; }
+    .word-pill.focus { box-shadow: 0 0 0 2px #fbbf24; }
+    .word-pill.dim   { opacity: .3; }
+    .word-pill .days { font-weight: 700; opacity: .75; margin-left: 4px; font-size: .65rem; }
+    .pick-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+    .pick-tabs button {
+      flex: 1; padding: 11px 10px; border-radius: 12px; border: 2px solid var(--border);
+      background: var(--surface); color: var(--soft);
+      font-family: 'Teachers', sans-serif; font-size: .9rem; font-weight: 800; cursor: pointer;
+    }
+    .pick-tabs button.on.learn { background: #fbbf24; border-color: #fbbf24; color: #2a1a00; }
+    .pick-tabs button.on.known { background: var(--green); border-color: var(--green); color: #06210f; }
+    .pick-tile.known-on { background: var(--green); border-color: var(--green); color: #06210f; }
+    .pick-tile.other { opacity: .45; }
+    .stars-big { font-size: 2.8rem; font-weight: 700; color: #fbbf24; line-height: 1; }
+    .stars-sub { font-size: .8rem; font-weight: 700; color: var(--soft); margin-top: 4px; }
+    .res-list { margin: 12px 0; text-align: left; }
+    .res-list-row { font-size: .9rem; font-weight: 700; color: #e4ddff; margin: 6px 0; }
+    .res-list-row .word-pill { margin-right: 4px; }
+    .empty-pool { font-size: .85rem; font-weight: 700; color: var(--soft); line-height: 1.5; }
+    .pick-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
+    .pick-sort { display: flex; border: 2px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .pick-sort button {
+      padding: 8px 14px; background: none; border: none; color: var(--soft);
+      font-family: 'Teachers', sans-serif; font-size: .85rem; font-weight: 800; cursor: pointer;
+    }
+    .pick-sort button.on { background: var(--accent); color: #fff; }
+    .btn-link {
+      background: none; border: none; color: var(--accent2); text-decoration: underline;
+      font-family: 'Teachers', sans-serif; font-size: .85rem; font-weight: 700; cursor: pointer; padding: 8px 4px;
+    }
+    .pick-set { margin-bottom: 18px; }
+    .pick-set-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .pick-set-name { font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--soft); }
+    .pick-words { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pick-tile {
+      min-height: 46px; padding: 8px 16px; border-radius: 12px;
+      background: var(--surface2); color: #e4ddff; border: 2px solid #4c3d8f;
+      font-family: 'Teachers', sans-serif; font-size: 1.05rem; font-weight: 800;
+      cursor: pointer; user-select: none; transition: transform .1s;
+    }
+    .pick-tile:active { transform: scale(.95); }
+    .pick-tile.on { background: #fbbf24; border-color: #fbbf24; color: #2a1a00; }
+    .pick-bar {
+      position: sticky; bottom: 0; display: flex; align-items: center; gap: 14px;
+      background: var(--bg); border-top: 2px solid var(--border);
+      margin: 8px -20px -48px; padding: 14px 20px 20px;
+    }
+    .pick-bar .btn-primary { width: auto; flex: 1; }
+    .pick-count { font-size: .9rem; font-weight: 800; color: var(--text); }
+    .pick-search { margin-bottom: 18px; }
+    .pick-search input {
+      width: 100%; padding: 13px 16px; border: 2px solid var(--border); border-radius: var(--radius);
+      font-size: 1rem; font-family: 'Teachers', sans-serif; font-weight: 600;
+      color: var(--text); background: var(--surface); outline: none;
+    }
+    .pick-search input:focus { border-color: var(--accent); }
+    .pick-suggest { margin-top: 10px; }
+    .pick-nomatch { font-size: .85rem; font-weight: 600; color: var(--soft); }
 
     /* ── DASHBOARD NAME ROW ── */
     .dash-name-row { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
@@ -761,7 +841,7 @@
     /* ── CUSTOMIZE SCREEN ── */
     .cust-topbar {
       display: flex; align-items: center; gap: 12px;
-      background: linear-gradient(135deg, #0f766e, #5eead4);
+      background: linear-gradient(135deg, #6d28d9, #f0abfc);
       margin: -24px -20px 22px; padding: 20px;
       border-radius: 0 0 24px 24px;
     }
@@ -841,7 +921,7 @@
     }
     .qr-url-input {
       flex: 1; padding: 8px 12px;
-      background: #12122a; border: 1.5px solid var(--border);
+      background: #1a1340; border: 1.5px solid var(--border);
       border-radius: 8px; font-family: 'Teachers', sans-serif;
       font-size: .8rem; font-weight: 500; color: var(--text); outline: none;
       transition: border-color .2s;
@@ -876,7 +956,7 @@
     /* ── CLASS VIEW SCREEN ── */
     .class-topbar {
       display: flex; align-items: center; gap: 12px;
-      background: linear-gradient(135deg, #0f766e, #5eead4);
+      background: linear-gradient(135deg, #6d28d9, #f0abfc);
       margin: -24px -20px 22px; padding: 20px;
       border-radius: 0 0 24px 24px;
     }
@@ -909,7 +989,7 @@
     }
     .class-bar-known    { background: #166534; height: 100%; transition: width .4s; }
     .class-bar-learning { background: #92400e; height: 100%; transition: width .4s; }
-    .class-bar-unseen   { background: #2e2e4a; height: 100%; }
+    .class-bar-unseen   { background: #3b2f7a; height: 100%; }
     .class-bar-stat {
       font-size: .68rem; font-weight: 700; color: var(--soft);
       white-space: nowrap; flex-shrink: 0; min-width: 40px; text-align: right;
@@ -954,41 +1034,22 @@
   <div id="screen-home" class="screen active">
     <header class="home-header">
       <div class="app-logo"><svg class="abc-logo-svg" viewBox="0 0 300 260" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <filter id="chalky">
-      <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="3" stitchTiles="stitch" result="noise"/>
-      <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.2" xChannelSelector="R" yChannelSelector="G"/>
-    </filter>
-  </defs>
-  <line x1="150" y1="108" x2="268" y2="28"  stroke="#fbbf24" stroke-width="2" opacity="0.7" stroke-linecap="round"/>
-  <line x1="150" y1="108" x2="290" y2="108" stroke="#fbbf24" stroke-width="1.5" opacity="0.5" stroke-linecap="round"/>
-  <line x1="150" y1="108" x2="262" y2="198" stroke="#f59e0b" stroke-width="1.5" opacity="0.5" stroke-linecap="round"/>
-  <line x1="150" y1="108" x2="38"  y2="22"  stroke="#fbbf24" stroke-width="2" opacity="0.65" stroke-linecap="round"/>
-  <line x1="150" y1="108" x2="18"  y2="112" stroke="#fbbf24" stroke-width="1.5" opacity="0.5" stroke-linecap="round"/>
-  <line x1="150" y1="108" x2="42"  y2="202" stroke="#f59e0b" stroke-width="1.5" opacity="0.45" stroke-linecap="round"/>
-  <line x1="150" y1="108" x2="150" y2="8"   stroke="#fbbf24" stroke-width="1.5" opacity="0.45" stroke-linecap="round"/>
-  <g transform="translate(268,24) rotate(15)"><polygon points="0,-14 3.5,-3.5 14,0 3.5,3.5 0,14 -3.5,3.5 -14,0 -3.5,-3.5" fill="#fbbf24"/></g>
-  <g transform="translate(289,106) rotate(-10)"><polygon points="0,-9 2.2,-2.2 9,0 2.2,2.2 0,9 -2.2,2.2 -9,0 -2.2,-2.2" fill="#fde68a"/></g>
-  <g transform="translate(261,198) rotate(20)"><polygon points="0,-11 2.8,-2.8 11,0 2.8,2.8 0,11 -2.8,2.8 -11,0 -2.8,-2.8" fill="#99f6e4"/></g>
-  <g transform="translate(36,20) rotate(-12)"><polygon points="0,-13 3.2,-3.2 13,0 3.2,3.2 0,13 -3.2,3.2 -13,0 -3.2,-3.2" fill="#fbbf24"/></g>
-  <g transform="translate(19,110) rotate(5)"><polygon points="0,-7 1.8,-1.8 7,0 1.8,1.8 0,7 -1.8,1.8 -7,0 -1.8,-1.8" fill="#fde68a"/></g>
-  <g transform="translate(43,202) rotate(-8)"><polygon points="0,-10 2.5,-2.5 10,0 2.5,2.5 0,10 -2.5,2.5 -10,0 -2.5,-2.5" fill="#2dd4bf"/></g>
-  <g transform="translate(150,10) rotate(10)"><polygon points="0,-8 2,-2 8,0 2,2 0,8 -2,2 -8,0 -2,-2" fill="#fbbf24"/></g>
-  <rect x="33" y="52" width="236" height="202" rx="10" fill="#3d2810" opacity="0.4"/>
-  <rect x="29" y="48" width="236" height="202" rx="10" fill="#5c3d1e"/>
-  <rect x="29" y="234" width="236" height="16" rx="5" fill="#7a5230"/>
-  <rect x="41" y="60" width="210" height="162" rx="6" fill="#2d4a3e"/>
-  <line x1="50" y1="158" x2="242" y2="158" stroke="#f0ede8" stroke-width="0.8" opacity="0.15" stroke-dasharray="4 5"/>
-  <ellipse cx="85"  cy="148" rx="26" ry="7" fill="#f0ede8" opacity="0.11" transform="rotate(-3 85 148)"/>
-  <ellipse cx="208" cy="175" rx="18" ry="5" fill="#f0ede8" opacity="0.09" transform="rotate(4 208 175)"/>
-  <text x="146" y="150" font-family="'Patrick Hand', cursive" font-size="58" fill="#f0ede8" opacity="0.93" filter="url(#chalky)" text-anchor="middle" transform="rotate(-2 146 150)">the</text>
-  <text x="146" y="205" font-family="'Patrick Hand', cursive" font-size="46" fill="#f0ede8" opacity="0.88" filter="url(#chalky)" text-anchor="middle" transform="rotate(2 146 205)">and · you</text>
-  <rect x="53"  y="237" width="18" height="7" rx="3" fill="#f0ede8" opacity="0.5"/>
-  <rect x="77"  y="238" width="12" height="6" rx="3" fill="#f0ede8" opacity="0.45"/>
-  <rect x="218" y="237" width="16" height="7" rx="3" fill="#f0ede8" opacity="0.5"/>
+  <g fill="#fde68a"><circle cx="30" cy="40" r="3"/><circle cx="270" cy="30" r="4"/><circle cx="250" cy="200" r="3"/><circle cx="45" cy="210" r="2.5"/><circle cx="120" cy="20" r="2"/><circle cx="200" cy="70" r="2.5"/><circle cx="70" cy="120" r="2"/><circle cx="230" cy="130" r="2"/></g>
+  <circle cx="235" cy="75" r="26" fill="#fb923c"/><ellipse cx="235" cy="78" rx="42" ry="9" fill="none" stroke="#fdba74" stroke-width="5" transform="rotate(-18 235 78)"/>
+  <circle cx="60" cy="175" r="18" fill="#c4b5fd"/><circle cx="53" cy="170" r="4" fill="#a78bfa"/><circle cx="66" cy="181" r="3" fill="#a78bfa"/>
+  <g transform="translate(150,135) rotate(-30)">
+    <path d="M-28 70 Q-50 95 -45 125 Q-20 110 -22 80 Z" fill="#ef4444"/><path d="M28 70 Q50 95 45 125 Q20 110 22 80 Z" fill="#ef4444"/>
+    <path d="M-14 95 Q0 150 14 95 Z" fill="#fbbf24"/><path d="M-8 95 Q0 130 8 95 Z" fill="#fb923c"/>
+    <path d="M0 -110 Q42 -50 36 60 Q0 80 -36 60 Q-42 -50 0 -110 Z" fill="#f5f0ff"/>
+    <path d="M0 -110 Q42 -50 36 60 L0 70 Z" fill="#e4ddff"/>
+    <path d="M0 -110 Q24 -78 28 -45 L-28 -45 Q-24 -78 0 -110 Z" fill="#ef4444"/>
+    <circle cx="0" cy="-5" r="20" fill="#7c3aed" stroke="#f5f0ff" stroke-width="6"/>
+    <text x="0" y="1" font-family="'Teachers', sans-serif" font-size="18" font-weight="900" fill="#fff" text-anchor="middle">a</text>
+    <rect x="-36" y="60" width="72" height="12" rx="4" fill="#4c1d95"/>
+  </g>
 </svg></div>
-      <h1 class="app-title">Fry Words</h1>
-      <p class="app-tagline">Fluency Tracker</p>
+      <h1 class="app-title">Word Rocket</h1>
+      <p class="app-tagline">🚀 Sight word practice</p>
       <div style="display:flex;gap:8px;justify-content:center;align-items:center;">
         <button class="btn-settings" onclick="showSettings()" title="Customize word sets">⚙ Word Sets</button>
         <button class="btn-settings btn-info" onclick="showInfo()" title="How this app works">ⓘ</button>
@@ -1033,7 +1094,7 @@
       </div>
       <div class="dash-topbar-btns">
         <button class="btn-fa-topbar" onclick="showFormativeAssessment()">Formative Assessment</button>
-        <button class="btn-begin" onclick="showDurationPicker()">▶ Begin Practice</button>
+        <button class="btn-begin" onclick="showDurationPicker()">🚀 Blast Off</button>
       </div>
     </div>
     <span id="points-goal-label" class="points-label">SCORE</span>
@@ -1042,14 +1103,17 @@
         <svg class="pie-svg" viewBox="0 0 90 90">
           <defs>
             <linearGradient id="pieGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%"   stop-color="#0f766e"/>
-              <stop offset="100%" stop-color="#5eead4"/>
+              <stop offset="0%"   stop-color="#6d28d9"/>
+              <stop offset="100%" stop-color="#f0abfc"/>
             </linearGradient>
           </defs>
-          <circle cx="45" cy="45" r="44" fill="#2a2a3e"/>
+          <circle cx="45" cy="45" r="44" fill="#2d2363"/>
           <path id="dash-pie" fill="url(#pieGrad)" d="M45,45 L45,1"/>
         </svg>
-        <span id="dash-pct" class="pie-pts-big">0 points</span>
+        <div>
+          <div id="dash-stars" class="stars-big">0 ⭐</div>
+          <div id="dash-progress" class="stars-sub"></div>
+        </div>
       </div>
     </div>
 
@@ -1063,10 +1127,14 @@
     </div>
 
     <div class="letter-status-card">
-      <div class="grid-label">Word Status</div>
+      <div class="focus-row">
+        <div class="grid-label">Word Status</div>
+        <button class="btn-choose" onclick="showPicker()">🎯 Choose Words</button>
+      </div>
+      <div id="focus-summary" class="focus-summary"></div>
       <div id="word-grid" class="word-grid"></div>
       <div class="legend">
-        <span><span class="ldot known"></span>Known (3-in-a-row, 3 days)</span>
+        <span><span class="ldot known"></span>Known (3 days in a row, under 4 sec)</span>
         <span><span class="ldot learning"></span>Practicing</span>
         <span><span class="ldot unseen"></span>Not yet seen</span>
       </div>
@@ -1195,6 +1263,36 @@
   </div>
 
 
+  <!-- == SCREEN: CHOOSE WORDS == -->
+  <div id="screen-pick" class="screen">
+    <div class="settings-topbar">
+      <button class="btn-back" onclick="showDashboard()">← Back</button>
+      <h2 class="settings-title" id="pick-title">Choose Words</h2>
+    </div>
+    <p class="settings-desc">Your child's teacher will tell you which words to choose. <strong>New words</strong> are the ones to learn. <strong>Known words</strong> are ones your child already reads easily; they get mixed in during practice. The app will not add any words on its own.</p>
+    <div class="pick-tabs">
+      <button id="pick-tab-learn" class="on learn" onclick="setPickMode('learn')">New words</button>
+      <button id="pick-tab-known" class="known" onclick="setPickMode('known')">Known words</button>
+    </div>
+    <div class="pick-toolbar">
+      <div class="pick-sort">
+        <button id="pick-sort-set" class="on" onclick="setPickSort('set')">By set</button>
+        <button id="pick-sort-az" onclick="setPickSort('az')">A to Z</button>
+      </div>
+      <button class="btn-link" onclick="clearPick()">Clear this list</button>
+    </div>
+    <div class="pick-search">
+      <input id="pick-search" type="search" placeholder="Type a word to find it" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" oninput="renderPickSuggest()" onkeydown="pickSearchKey(event)" />
+      <div id="pick-suggest" class="pick-words pick-suggest"></div>
+    </div>
+    <div id="pick-grid"></div>
+    <div class="pick-bar">
+      <span id="pick-count" class="pick-count"></span>
+      <button class="btn-primary" onclick="savePick()">Save Words</button>
+    </div>
+  </div>
+
+
   <!-- == SCREEN: STUDENT CUSTOMIZE == -->
   <div id="screen-customize" class="screen">
     <div class="cust-topbar">
@@ -1229,7 +1327,7 @@
 
     <div class="cust-section-label">Pick a color</div>
     <div class="cust-colors">
-      <button class="cust-color-btn" id="color-purple" style="background:#0d9488" onclick="pickColor('#0d9488', 'purple')"></button>
+      <button class="cust-color-btn" id="color-purple" style="background:#7c3aed" onclick="pickColor('#7c3aed', 'purple')"></button>
       <button class="cust-color-btn" id="color-pink" style="background:#ec4899" onclick="pickColor('#ec4899', 'pink')"></button>
       <button class="cust-color-btn" id="color-blue" style="background:#3b82f6" onclick="pickColor('#3b82f6', 'blue')"></button>
       <button class="cust-color-btn" id="color-teal" style="background:#14b8a6" onclick="pickColor('#14b8a6', 'teal')"></button>
@@ -1271,9 +1369,9 @@
 
       <div class="points-celebration">
         <div id="res-confetti" class="confetti-row">⭐ ⭐ ⭐</div>
-        <div class="pts-earned-label">Points earned today</div>
+        <div class="pts-earned-label">Stars earned today</div>
         <div id="res-pts-earned" class="pts-earned-number">0</div>
-        <div class="pts-earned-unit">points</div>
+        <div class="pts-earned-unit">stars</div>
         <div id="res-pts-total" class="pts-total-row"></div>
       </div>
       <div id="breakdown" class="breakdown"></div>
@@ -1282,16 +1380,16 @@
         <svg class="res-pie-svg" viewBox="0 0 90 90">
           <defs>
             <linearGradient id="resPieGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%"   stop-color="#0f766e"/>
-              <stop offset="100%" stop-color="#5eead4"/>
+              <stop offset="0%"   stop-color="#6d28d9"/>
+              <stop offset="100%" stop-color="#f0abfc"/>
             </linearGradient>
           </defs>
-          <circle cx="45" cy="45" r="44" fill="#2a2a3e"/>
+          <circle cx="45" cy="45" r="44" fill="#2d2363"/>
           <path id="res-pie" fill="url(#resPieGrad)" d="M45,45 L45,1"/>
         </svg>
         <div class="res-pie-label">
           <span id="res-pie-pct" class="res-pie-pct">0%</span>
-          <span class="res-pie-sub">to full mastery</span>
+          <span class="res-pie-sub">of this list known</span>
         </div>
       </div>
 
@@ -1351,6 +1449,10 @@
     const MAX_POINTS         = WORDS_ALL.length * (PTS_PER_PASS * 2 + PTS_MASTERY); // 2000
     const CIRC                = 2 * Math.PI * 41; // SVG timer arc circumference (r=41)
     const IDLE_SECS           = 5;      // seconds before idle overlay appears
+    const FLUENT_MS           = 4000;   // a correct read must come within 4 seconds to count
+    const IR_MAX_KNOWN        = 9;      // known words folded in around each new word
+    const STARS_SESSION       = 1;      // star for finishing a practice session
+    const STARS_WORD          = 3;      // stars when a word becomes known
 
     // -- App state ------------------------------------------
     let state = {
@@ -1386,6 +1488,192 @@
     function getStudent(id)    { return state.students.find(s => s.id === id) || null; }
     function currentStudent()  { return getStudent(state.currentStudentId); }
 
+    // ========================================================
+    // CHOOSE WORDS (home practice word list)
+    // ========================================================
+    let _pickSel = new Set();     // new words to learn
+    let _pickKnown = new Set();   // words already known
+    let _pickMode = 'learn';
+    let _pickSort = 'set';
+
+    function setPickMode(m) {
+      _pickMode = m;
+      document.getElementById('pick-tab-learn').classList.toggle('on', m === 'learn');
+      document.getElementById('pick-tab-known').classList.toggle('on', m === 'known');
+      refreshPicker();
+    }
+
+    // Toggle a word in the current list; a word can be in only one list
+    function togglePick(w) {
+      const mine  = _pickMode === 'learn' ? _pickSel : _pickKnown;
+      const other = _pickMode === 'learn' ? _pickKnown : _pickSel;
+      if (mine.has(w)) mine.delete(w);
+      else { mine.add(w); other.delete(w); }
+    }
+
+    function showPicker() {
+      const s = currentStudent();
+      if (!s) return showHome();
+      _pickSel = new Set(s.focusWords || []);
+      _pickKnown = new Set(s.knownWords || []);
+      setPickMode('learn');
+      document.getElementById('pick-search').value = '';
+      document.getElementById('pick-title').textContent = 'Words for ' + s.name;
+      renderPicker();
+      showScreen('screen-pick');
+    }
+
+    function setPickSort(mode) { _pickSort = mode; renderPicker(); }
+
+    function makePickTile(w) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'pick-tile';
+      b.dataset.w = w;
+      b.textContent = w;
+      b.addEventListener('click', () => { togglePick(w); refreshPicker(); });
+      return b;
+    }
+
+    function renderPicker() {
+      document.getElementById('pick-sort-set').classList.toggle('on', _pickSort === 'set');
+      document.getElementById('pick-sort-az').classList.toggle('on', _pickSort === 'az');
+      const grid = document.getElementById('pick-grid');
+      grid.innerHTML = '';
+      if (_pickSort === 'az') {
+        const wrap = document.createElement('div');
+        wrap.className = 'pick-words';
+        [...WORD_ORDER].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+          .forEach(w => wrap.appendChild(makePickTile(w)));
+        grid.appendChild(wrap);
+      } else {
+        for (let i = 0; i < WORD_ORDER.length; i += SET_SIZE) {
+          const words = WORD_ORDER.slice(i, i + SET_SIZE);
+          const sec = document.createElement('div');
+          sec.className = 'pick-set';
+          const head = document.createElement('div');
+          head.className = 'pick-set-head';
+          head.innerHTML = `<span class="pick-set-name">Set ${Math.floor(i / SET_SIZE) + 1}</span>`;
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'btn-link';
+          btn.dataset.set = words.join(',');
+          btn.addEventListener('click', () => {
+            const mine = _pickMode === 'learn' ? _pickSel : _pickKnown;
+            const all = words.every(w => mine.has(w));
+            words.forEach(w => { if (all) mine.delete(w); else if (!mine.has(w)) togglePick(w); });
+            refreshPicker();
+          });
+          head.appendChild(btn);
+          sec.appendChild(head);
+          const wrap = document.createElement('div');
+          wrap.className = 'pick-words';
+          words.forEach(w => wrap.appendChild(makePickTile(w)));
+          sec.appendChild(wrap);
+          grid.appendChild(sec);
+        }
+      }
+      refreshPicker();
+    }
+
+    function refreshPicker() {
+      const mine  = _pickMode === 'learn' ? _pickSel : _pickKnown;
+      const other = _pickMode === 'learn' ? _pickKnown : _pickSel;
+      document.querySelectorAll('#pick-grid .pick-tile').forEach(t => styleTile(t, mine, other));
+      document.querySelectorAll('#pick-grid [data-set]').forEach(b => {
+        const words = b.dataset.set.split(',');
+        b.textContent = words.every(w => mine.has(w)) ? 'Clear set' : 'Select set';
+      });
+      renderPickSuggest();
+      document.getElementById('pick-count').textContent =
+        `${_pickSel.size} new · ${_pickKnown.size} known`;
+    }
+
+    function styleTile(t, mine, other) {
+      const w = t.dataset.w || t.textContent;
+      const on = mine.has(w);
+      t.classList.toggle('on', on && _pickMode === 'learn');
+      t.classList.toggle('known-on', on && _pickMode === 'known');
+      t.classList.toggle('other', !on && other.has(w));
+      t.title = !on && other.has(w) ? (_pickMode === 'learn' ? 'In the known list' : 'In the new words list') : '';
+      t.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+
+    function clearPick() {
+      (_pickMode === 'learn' ? _pickSel : _pickKnown).clear();
+      refreshPicker();
+    }
+
+    // Type-ahead: suggest words from the list as the parent types
+    function pickMatches() {
+      const q = document.getElementById('pick-search').value.trim().toLowerCase();
+      if (!q) return null;
+      const starts = WORD_ORDER.filter(w => w.toLowerCase().startsWith(q));
+      const has    = WORD_ORDER.filter(w => !w.toLowerCase().startsWith(q) && w.toLowerCase().includes(q));
+      return [...starts, ...has].slice(0, 8);
+    }
+
+    function renderPickSuggest() {
+      const box = document.getElementById('pick-suggest');
+      box.innerHTML = '';
+      const m = pickMatches();
+      if (m === null) return;
+      if (!m.length) {
+        box.innerHTML = '<span class="pick-nomatch">No word in the list matches that.</span>';
+        return;
+      }
+      const mine  = _pickMode === 'learn' ? _pickSel : _pickKnown;
+      const other = _pickMode === 'learn' ? _pickKnown : _pickSel;
+      m.forEach(w => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'pick-tile';
+        b.dataset.w = w;
+        b.textContent = w;
+        styleTile(b, mine, other);
+        b.addEventListener('click', () => {
+          togglePick(w);
+          const inp = document.getElementById('pick-search');
+          inp.value = '';
+          refreshPicker();
+          inp.focus();
+        });
+        box.appendChild(b);
+      });
+    }
+
+    function pickSearchKey(e) {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      const m = pickMatches();
+      if (!m || !m.length) return;
+      const mine = _pickMode === 'learn' ? _pickSel : _pickKnown;
+      if (!mine.has(m[0])) togglePick(m[0]);
+      document.getElementById('pick-search').value = '';
+      refreshPicker();
+    }
+
+    function savePick() {
+      const s = currentStudent();
+      if (!s) return showHome();
+      s.focusWords = WORD_ORDER.filter(w => _pickSel.has(w));
+      s.knownWords = WORD_ORDER.filter(w => _pickKnown.has(w));
+      if (!s.preKnown) s.preKnown = [];
+      // Words the parent marks known count as known right away
+      s.knownWords.forEach(w => {
+        if (s.scores[w] !== 'known') { s.scores[w] = 'known'; if (!s.preKnown.includes(w)) s.preKnown.push(w); }
+      });
+      // A word removed from the known list goes back to learning unless the child earned it
+      s.preKnown = s.preKnown.filter(w => {
+        if (s.knownWords.includes(w)) return true;
+        if (passedDays(s, w) < DAYS_NEEDED) s.scores[w] = (s.history[w]||[]).length ? 'learning' : 'unseen';
+        return false;
+      });
+      saveState();
+      toast(`${s.focusWords.length} new · ${s.knownWords.length} known saved`, 'green');
+      showDashboard();
+    }
+
     function countScores(student) {
       let known=0, learning=0, unseen=0;
       WORDS_ALL.forEach(w => {
@@ -1397,8 +1685,21 @@
       return { known, learning, unseen };
     }
 
+    // Days in a row (most recent first) on which the word was read correctly within 4 seconds every time
     function passedDays(student, word) {
-      return ((student.history||{})[word]||[]).filter(e=>e.passed).length;
+      const h = ((student.history||{})[word]||[]);
+      let n = 0;
+      for (let i = h.length - 1; i >= 0; i--) { if (h[i].passed) n++; else break; }
+      return n;
+    }
+
+    // Parent-chosen words, split into what is still being learned and what is known
+    function targetWords(s) {
+      return WORD_ORDER.filter(w => (s.focusWords||[]).includes(w) && s.scores[w] !== 'known');
+    }
+    function knownPool(s) {
+      const set = new Set([...(s.knownWords||[]), ...(s.focusWords||[])]);
+      return WORD_ORDER.filter(w => set.has(w) && s.scores[w] === 'known');
     }
 
     function calcPoints(student) {
@@ -1429,7 +1730,7 @@
         li.innerHTML = `
           <div class="student-left" onclick="selectStudent('${student.id}')">
             <span class="student-name"><span class="student-icon">${student.icon||'⭐'}</span>${escHtml(student.name)}</span>
-            <span class="progress-badge">${known}/${WORDS_ALL.length} known</span>
+            <span class="progress-badge">${(() => { const k = knownPool(student).length, t = targetWords(student).length; return (k + t) ? `${k}/${k + t} known · ${student.stars || 0} ⭐` : 'No words chosen yet'; })()}</span>
           </div>
           <button class="btn-customize-inline" onclick="event.stopPropagation();state.currentStudentId='${student.id}';showCustomize()">✏</button>
           <span class="student-arrow" onclick="selectStudent('${student.id}')">›</span>
@@ -1443,7 +1744,7 @@
       const name = inp.value.trim();
       if (!name) { inp.focus(); return; }
       const { scores, streak, history, responses } = freshScores();
-      state.students.push({ id:'stu_'+Date.now(), name, scores, streak, history, responses, practiceDays:[], notes:[], icon:'⭐', color:'#0d9488' });
+      state.students.push({ id:'stu_'+Date.now(), name, scores, streak, history, responses, practiceDays:[], notes:[], icon:'⭐', color:'#7c3aed' });
       saveState(); inp.value = ''; renderStudentList();
     }
 
@@ -1462,14 +1763,22 @@
     // ========================================================
     function renderDashboard(student) {
       document.getElementById('dash-name').textContent = student.name;
-      document.getElementById('points-goal-label').textContent = `SCORE (GOAL IS ${MAX_POINTS} PTS)`;
+      document.getElementById('points-goal-label').textContent = 'STARS';
       applyStudentTheme(student);
       renderStreakSection(student);
       renderNotes(student);
+      const focus = new Set(student.focusWords || []);
+      const tw = targetWords(student), kp = knownPool(student);
+      document.getElementById('focus-summary').textContent = (tw.length || kp.length)
+        ? `${tw.length} new word${tw.length === 1 ? '' : 's'} to learn · ${kp.length} known`
+        : '';
 
-      const pts   = calcPoints(student);
-      const ratio = Math.min(1, pts / MAX_POINTS);
-      document.getElementById('dash-pct').textContent = pts + ' points';
+      const targets = targetWords(student), knowns = knownPool(student);
+      const listTotal = targets.length + knowns.length;
+      const ratio = listTotal ? knowns.length / listTotal : 0;
+      document.getElementById('dash-stars').textContent = (student.stars || 0) + ' ⭐';
+      document.getElementById('dash-progress').textContent =
+        listTotal ? `${knowns.length} of ${listTotal} words on this list known` : 'No words chosen yet';
       const cx=45, cy=45, r=44;
       const angle = ratio * 2 * Math.PI;
       const x = cx + r * Math.sin(angle);
@@ -1483,19 +1792,23 @@
 
       const grid = document.getElementById('word-grid');
       grid.innerHTML = '';
-      WORDS_ALL.forEach(w => {
+      const pool = [...tw, ...kp];
+      if (!pool.length) {
+        grid.innerHTML = '<div class="empty-pool">No words yet. Tap Choose Words and enter the words your child\'s teacher gave you.</div>';
+      }
+      pool.forEach(w => {
         const cell = document.createElement('div');
         const status = student.scores[w];
         const days   = passedDays(student, w);
         cell.className = `word-pill ${status}`;
-        cell.textContent = w;
-        cell.title = status==='known' ? `${w}: mastered!` : status==='learning' ? `${w}: ${days}/${DAYS_NEEDED} days` : `${w}: not yet seen`;
+        cell.innerHTML = escHtml(w) + (status === 'known' ? '' : `<span class="days">${days}/${DAYS_NEEDED}</span>`);
+        cell.title = status==='known' ? `${w}: known` : `${w}: ${days} of ${DAYS_NEEDED} days in a row`;
         grid.appendChild(cell);
       });
     }
 
     function applyStudentTheme(student) {
-      const color = student.color || '#0d9488';
+      const color = student.color || '#7c3aed';
       const grad  = document.getElementById('pieGrad');
       if (grad) {
         grad.querySelector('stop:first-child').setAttribute('stop-color', color);
@@ -1575,66 +1888,77 @@
       if (!sess || !student) return 0;
       const t = today();
       if (!student.history) student.history = {};
-      let sessionPoints = 0;
+      if (!student.stars)   student.stars = 0;
+      let starsEarned = 0;
 
-      WORDS_ALL.forEach(w => {
-        if (!sess.practicedWords.has(w)) return;
+      sess.practicedWords.forEach(w => {
         if (!student.history[w]) student.history[w] = [];
-        const passed = (student.streak[w]||0) >= DAY_STREAK_NEEDED;
-        const existing = student.history[w].find(e => e.date===t);
-        const wasAlreadyPassed = existing && existing.passed;
-        if (existing) { if (passed) existing.passed = true; }
-        else student.history[w].push({ date:t, passed });
+        const passed   = sess.dayPass[w] !== false;
+        const existing = student.history[w].find(e => e.date === t);
+        if (existing) existing.passed = existing.passed && passed;
+        else student.history[w].push({ date: t, passed });
 
-        if (passed && !wasAlreadyPassed) {
-          const daysNow = passedDays(student, w);
-          sessionPoints += (daysNow===DAYS_NEEDED) ? PTS_MASTERY : PTS_PER_PASS;
-        }
-
-        const wasKnown = student.scores[w]==='known';
-        const days = passedDays(student, w);
-        if (days >= DAYS_NEEDED) {
+        if (student.scores[w] !== 'known' && passedDays(student, w) >= DAYS_NEEDED) {
           student.scores[w] = 'known';
-        } else if (student.scores[w]!=='known') {
-          if (student.scores[w]==='unseen' && sess.practicedWords.has(w)) student.scores[w]='learning';
+          sess.newlyKnown.push(w);
+          starsEarned += STARS_WORD;
         }
       });
 
-      return sessionPoints;
+      if (sess.practicedWords.size) starsEarned += STARS_SESSION;
+      student.stars += starsEarned;
+      return starsEarned;
     }
 
     // ========================================================
     // SESSION - BUILD QUEUE
     // ========================================================
-    function injectNextUnseen(student, sess) {
-      const inQueue    = new Set(sess.queue.slice(sess.cardIndex));
-      const nextUnseen = WORD_ORDER.find(w => student.scores[w]==='unseen' && !inQueue.has(w));
-      if (!nextUnseen) return;
-      const insertAt = Math.min(sess.cardIndex+2, sess.queue.length);
-      sess.queue.splice(insertAt, 0, nextUnseen);
-      sess.setProgress[nextUnseen] = null;
-    }
-
+    // Incremental rehearsal. For each new word T with known words K:
+    //   T k · T k k · T k k k ... up to IR_MAX_KNOWN knowns.
+    // The known words in every round are drawn at random so the child
+    // cannot learn the order. Once T has been folded in it joins the
+    // knowns for the next new word.
     function buildQueue(student) {
-      const learning = shuffle(WORD_ORDER.filter(w => student.scores[w]==='learning'));
-      const unseen   = WORD_ORDER.filter(w => student.scores[w]==='unseen');
-      const known    = shuffle(WORD_ORDER.filter(w => student.scores[w]==='known'));
-      const activeCount = learning.length + unseen.length;
-      const reviewSlots = activeCount>0 ? Math.min(KNOWN_REVIEW_COUNT, known.length) : known.length;
-      const ordered = [...learning, ...unseen, ...known.slice(0, reviewSlots)];
-      if (!ordered.length) return WORD_ORDER.slice(0, SET_SIZE);
-      return ordered.slice(0, SET_SIZE);
+      const targets  = targetWords(student);
+      const learning = targets.filter(w => student.scores[w] === 'learning');
+      const unseen   = targets.filter(w => student.scores[w] !== 'learning');
+      const ordered  = [...learning, ...unseen];
+      let knowns     = knownPool(student);
+      const q = [];
+
+      if (!ordered.length) {
+        shuffle(knowns).forEach(w => q.push({ w, target: false, block: 0 }));
+        return q;
+      }
+
+      ordered.forEach(t => {
+        const start = q.length;
+        const n = Math.min(knowns.length, IR_MAX_KNOWN);
+        if (!n) { q.push({ w: t, target: true, block: start }); return; }
+        for (let i = 1; i <= n; i++) {
+          q.push({ w: t, target: true, block: start });
+          shuffle(knowns).slice(0, i).forEach(k => q.push({ w: k, target: false, block: start }));
+        }
+        knowns = [t, ...knowns];
+      });
+      return q;
     }
 
     function startSession() {
       const student = currentStudent();
       if (!student) return;
       WORDS_ALL.forEach(w => { student.streak[w] = 0; });
+      if (!targetWords(student).length && !knownPool(student).length) {
+        toast('Choose words first', 'red');
+        showPicker();
+        return;
+      }
       const queue = buildQueue(student);
-      const setProgress = {};
-      queue.forEach(w => setProgress[w]=null);
       state.session = {
-        queue, setProgress,
+        queue,
+        dayPass:         {},
+        slowWords:       new Set(),
+        newlyKnown:      [],
         cardIndex:       0,
         totalCorrect:    0, totalWrong:    0, totalProvided: 0,
         correctWords:    new Set(), wrongWords: new Set(), providedWords: new Set(),
@@ -1762,12 +2086,12 @@
     // ========================================================
     // STUDENT CUSTOMIZATION
     // ========================================================
-    let _custIcon='⭐', _custColor='#0d9488';
+    let _custIcon='⭐', _custColor='#7c3aed';
 
     function showCustomize() {
       const student = currentStudent();
       if (!student) return;
-      _custIcon=student.icon||'⭐'; _custColor=student.color||'#0d9488';
+      _custIcon=student.icon||'⭐'; _custColor=student.color||'#7c3aed';
       document.getElementById('cust-student-name').textContent = student.name;
       updateCustPreview();
       document.querySelectorAll('.cust-icon-btn').forEach(b=>b.classList.toggle('selected',b.textContent===_custIcon));
@@ -1837,7 +2161,7 @@
           const knownPct    = Math.round(known/total*100);
           const learningPct = Math.round(learning/total*100);
           const unseenPct   = 100 - knownPct - learningPct;
-          const bg = known===total ? '#166534' : known>0||learning>0 ? '#92400e' : '#2e2e4a';
+          const bg = known===total ? '#166534' : known>0||learning>0 ? '#92400e' : '#3b2f7a';
           rows += `<div class="class-letter-row">
             <div class="class-letter-badge" style="background:${bg}">${w}</div>
             <div class="class-bar-wrap">
@@ -1863,11 +2187,11 @@
 
     function renderClassByStudent() {
       const panel    = document.getElementById('classpanel-students');
-      const students = [...state.students].sort((a,b) => calcPoints(b) - calcPoints(a));
+      const students = [...state.students].sort((a,b) => (b.stars||0) - (a.stars||0));
       if (!students.length) { panel.innerHTML = '<div class="class-empty">No students yet.</div>'; return; }
 
       const rows = students.map(s => {
-        const pts  = calcPoints(s);
+        const pts  = (s.stars||0) + ' ⭐';
         const { known, learning } = countScores(s);
         const knownPct    = Math.round(known/WORDS_ALL.length*100);
         const learningPct = Math.round(learning/WORDS_ALL.length*100);
@@ -1879,7 +2203,7 @@
             <div class="class-bar-known"    style="width:${knownPct}%"></div>
             <div class="class-bar-learning" style="width:${learningPct}%"></div>
           </div>
-          <span class="class-pts-label">${pts} pts · 🔥${streak}</span>
+          <span class="class-pts-label">${pts} · 🔥${streak}</span>
         </div>`;
       }).join('');
 
@@ -1887,7 +2211,7 @@
         <div style="font-size:.72rem;font-weight:700;color:var(--soft);display:flex;gap:14px;margin-bottom:12px">
           <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#166534;margin-right:4px"></span>Known</span>
           <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#92400e;margin-right:4px"></span>Practicing</span>
-          <span style="color:var(--soft)">Sorted by points ↓</span>
+          <span style="color:var(--soft)">Sorted by stars ↓</span>
         </div>
         ${rows}`;
     }
@@ -2087,8 +2411,9 @@
       if (!student) return;
 
       const today_str = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
-      const pts       = calcPoints(student);
-      const pct       = Math.round((pts / MAX_POINTS) * 100);
+      const pts       = student.stars || 0;
+      const _tw = targetWords(student), _kp = knownPool(student);
+      const pct       = (_tw.length + _kp.length) ? Math.round(_kp.length / (_tw.length + _kp.length) * 100) : 0;
 
       const gridCells = WORD_ORDER.map(w => {
         const s = student.scores[w];
@@ -2153,7 +2478,7 @@
         }).join('');
         histHtml += `<div style="margin-bottom:16px">
           <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;
-            color:#0f766e;border-bottom:2px solid #ede9fe;padding-bottom:4px;margin-bottom:6px">Set ${setNum}</div>
+            color:#6d28d9;border-bottom:2px solid #ede9fe;padding-bottom:4px;margin-bottom:6px">Set ${setNum}</div>
           <table style="width:100%;border-collapse:collapse">${rows}</table>
         </div>`;
       }
@@ -2165,7 +2490,7 @@
         <style>
           * { box-sizing:border-box; margin:0; padding:0; }
           #print-container { font-family: system-ui, sans-serif; color:#1a2340; padding:32px; max-width:800px; margin:0 auto; }
-          h1 { font-size:22px; font-weight:900; color:#0f766e; }
+          h1 { font-size:22px; font-weight:900; color:#6d28d9; }
           h2 { font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:#5a6484; margin:22px 0 8px; }
           .meta { font-size:12px; color:#94a3b8; margin-top:3px; }
           .summary { display:flex; gap:16px; margin-top:12px; margin-bottom:4px; }
@@ -2175,14 +2500,14 @@
           table { width:100%; border-collapse:collapse; }
         </style>
 
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #0f766e;padding-bottom:14px;margin-bottom:20px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #6d28d9;padding-bottom:14px;margin-bottom:20px">
           <div>
-            <h1>Fry Words Report</h1>
+            <h1>Word Rocket Report</h1>
             <div class="meta">${student.name} &nbsp;·&nbsp; ${today_str}</div>
           </div>
           <div style="text-align:right">
-            <div style="font-size:28px;font-weight:900;color:#0f766e">${pts} pts</div>
-            <div style="font-size:10px;color:#94a3b8;font-weight:700">of ${MAX_POINTS} &nbsp;·&nbsp; ${pct}% mastered</div>
+            <div style="font-size:28px;font-weight:900;color:#6d28d9">${pts} stars</div>
+            <div style="font-size:10px;color:#94a3b8;font-weight:700">${pct}% of chosen list known</div>
           </div>
         </div>
 
@@ -2219,7 +2544,7 @@
         </div>
         ${setRowsHtml}
 
-        ${(student.notes && student.notes.length) ? '<h2 style="margin-top:28px">Teacher Notes</h2><div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">' + student.notes.map(n => '<div style="padding:10px 12px;border-left:3px solid #0f766e;background:#f5f3ff;border-radius:6px"><div style="font-size:12px;color:#1a2340">' + n.text + '</div><div style="font-size:10px;color:#94a3b8;margin-top:3px">' + n.date + '</div></div>').join('') + '</div>' : ''}
+        ${(student.notes && student.notes.length) ? '<h2 style="margin-top:28px">Teacher Notes</h2><div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">' + student.notes.map(n => '<div style="padding:10px 12px;border-left:3px solid #6d28d9;background:#f5f3ff;border-radius:6px"><div style="font-size:12px;color:#1a2340">' + n.text + '</div><div style="font-size:10px;color:#94a3b8;margin-top:3px">' + n.date + '</div></div>').join('') + '</div>' : ''}
 
         <h2 style="margin-top:28px">Response History</h2>
         <div style="font-size:10px;font-weight:700;color:#5a6484;display:flex;gap:12px;margin-bottom:10px">
@@ -2307,11 +2632,10 @@
       if (sess.cardIndex >= sess.queue.length) {
         sess.queue     = buildQueue(student);
         sess.cardIndex = 0;
-        sess.setProgress = {};
-        sess.queue.forEach(w => sess.setProgress[w] = null);
       }
 
-      const word = sess.queue[sess.cardIndex];
+      const word = sess.queue[sess.cardIndex].w;
+      if (sess.dayPass[word] === undefined) sess.dayPass[word] = true;
 
       const card = document.getElementById('flashcard');
       card.classList.remove('flip');
@@ -2332,7 +2656,7 @@
     function startIdleTimer() {
       clearIdleTimer();
       _idleTimer = setTimeout(() => {
-        const word = state.session.queue[state.session.cardIndex];
+        const word = state.session.queue[state.session.cardIndex].w;
         document.getElementById('prompt-word').textContent = word;
         document.getElementById('prompt-cta').textContent = 'Read the word aloud.';
         document.getElementById('prompt-done-btn').textContent = 'Done - answer provided';
@@ -2374,7 +2698,8 @@
       const sess    = state.session;
       if (!sess || sess.secsLeft <= 0) return;
       const student = currentStudent();
-      const word    = sess.queue[sess.cardIndex];
+      const item    = sess.queue[sess.cardIndex];
+      const word    = item.w;
 
       if (outcome === 'incorrect') {
         document.getElementById('prompt-word').textContent = word;
@@ -2394,73 +2719,32 @@
       document.getElementById('prompt-overlay').classList.remove('visible');
 
       sess.practicedWords.add(word);
+      const responseTime = Date.now() - (sess.cardShownAt || 0);
 
-      if (!student.responses)      student.responses = {};
+      if (!student.responses)       student.responses = {};
       if (!student.responses[word]) student.responses[word] = [];
-      student.responses[word].push({ date: today(), outcome });
+      student.responses[word].push({ date: today(), outcome, ms: responseTime });
+
+      if (student.scores[word] === 'unseen') student.scores[word] = 'learning';
 
       if (outcome === 'correct') {
         sess.totalCorrect++;
         sess.correctWords.add(word);
-        sess.setProgress[word] = 'c';
-
-        student.streak[word] = (student.streak[word] || 0) + 1;
-
-        const responseTime  = Date.now() - (sess.cardShownAt || 0);
-        const wasUnseen     = student.scores[word] === 'unseen' ||
-                              (student.scores[word] === 'learning' &&
-                               ((student.history || {})[word] || []).length === 0);
-
-        if (wasUnseen && responseTime <= 2000) {
-          sess.instantStreak[word] = (sess.instantStreak[word] || 0) + 1;
-
-          if (sess.instantStreak[word] >= 2) {
-            student.scores[word] = 'known';
-            const t = today();
-            if (!student.history[word]) student.history[word] = [];
-            for (let d = 0; d < DAYS_NEEDED; d++) {
-              student.history[word].push({ date: t, passed: true });
-            }
-            injectNextUnseen(student, sess);
-          } else {
-            if (student.scores[word] === 'unseen') {
-              student.scores[word] = 'learning';
-            }
-            const reinsertAt = Math.min(sess.cardIndex + 2, sess.queue.length);
-            sess.queue.splice(reinsertAt, 0, word);
-            sess.setProgress[word] = null;
-          }
-        } else {
-          sess.instantStreak[word] = 0;
-          if (student.scores[word] === 'unseen') {
-            student.scores[word] = 'learning';
-          }
+        if (responseTime > FLUENT_MS) {
+          // Right, but too slow to count toward "known" today
+          sess.slowWords.add(word);
+          sess.dayPass[word] = false;
         }
-
+        sess.cardIndex++;
       } else {
-        if (outcome === 'provided') {
-          sess.totalProvided++;
-          sess.providedWords.add(word);
-        } else {
-          sess.totalWrong++;
-          sess.wrongWords.add(word);
-        }
-        sess.setProgress[word] = 'w';
-
-        student.streak[word] = 0;
-        if (sess.instantStreak) sess.instantStreak[word] = 0;
-
-        if (student.scores[word] === 'unseen') {
-          student.scores[word] = 'learning';
-        }
-
-        const reinsertAt = Math.min(sess.cardIndex + 3, sess.queue.length);
-        sess.queue.splice(reinsertAt, 0, word);
-        sess.setProgress[word] = null;
+        if (outcome === 'provided') { sess.totalProvided++; sess.providedWords.add(word); }
+        else                        { sess.totalWrong++;    sess.wrongWords.add(word); }
+        sess.dayPass[word] = false;
+        // A miss on a new word restarts its rehearsal from the beginning
+        sess.cardIndex = item.target ? item.block : sess.cardIndex + 1;
       }
 
       saveState();
-      sess.cardIndex++;
       renderCard();
     }
 
@@ -2494,10 +2778,12 @@
       document.getElementById('res-emoji').textContent  = emoji;
       document.getElementById('res-name').textContent   = student ? student.name : '';
 
-      const ptsNow = student ? calcPoints(student) : 0;
+      const ptsNow = student ? (student.stars || 0) : 0;
+      const tw = student ? targetWords(student) : [], kp = student ? knownPool(student) : [];
+      const listTotal = tw.length + kp.length;
 
       (() => {
-        const ratio = Math.min(1, ptsNow / MAX_POINTS);
+        const ratio = listTotal ? kp.length / listTotal : 0;
         const cx=45, cy=45, r=44;
         const angle = ratio * 2 * Math.PI;
         const x = cx + r * Math.sin(angle), y = cy - r * Math.cos(angle);
@@ -2511,8 +2797,8 @@
         if (student) {
           const g = document.getElementById('resPieGrad');
           if (g) {
-            g.querySelector('stop:first-child').setAttribute('stop-color', student.color || '#0f766e');
-            g.querySelector('stop:last-child').setAttribute('stop-color', shiftColor(student.color || '#0f766e', 40));
+            g.querySelector('stop:first-child').setAttribute('stop-color', student.color || '#6d28d9');
+            g.querySelector('stop:last-child').setAttribute('stop-color', shiftColor(student.color || '#6d28d9', 40));
           }
         }
       })();
@@ -2521,17 +2807,17 @@
       ptsEl.textContent = ptsEarned;
       ptsEl.classList.toggle('has-points', ptsEarned > 0);
       document.getElementById('res-pts-total').innerHTML =
-        `Total: <strong>${ptsNow} / ${MAX_POINTS} pts</strong> - ${Math.round((ptsNow/MAX_POINTS)*100)}% to full mastery`;
+        `Total: <strong>${ptsNow} ⭐</strong>`;
 
       const confettiEl = document.getElementById('res-confetti');
-      if (ptsEarned >= 20)      confettiEl.textContent = '🎉 🏆 🎉';
-      else if (ptsEarned >= 10) confettiEl.textContent = '🌟 🏅 🌟';
+      if (ptsEarned >= 7)       confettiEl.textContent = '🎉 🏆 🎉';
+      else if (ptsEarned >= 4)  confettiEl.textContent = '🌟 🏅 🌟';
       else if (ptsEarned > 0)   confettiEl.textContent = '⭐ ⭐ ⭐';
       else                      confettiEl.textContent = '💪 💪 💪';
 
       if (ptsEarned > 0) {
         const cel = document.querySelector('.points-celebration');
-        const colors = ['#0d9488','#5eead4','#22c55e','#fbbf24','#f472b6','#60a5fa'];
+        const colors = ['#7c3aed','#f0abfc','#22c55e','#fbbf24','#f472b6','#60a5fa'];
         for (let i = 0; i < 28; i++) {
           const p = document.createElement('div');
           p.className = 'confetti-piece';
@@ -2549,7 +2835,14 @@
         }
       }
 
-      document.getElementById('breakdown').innerHTML = '';
+      const pills = ws => ws.map(w => `<span class="word-pill learning">${escHtml(w)}</span>`).join(' ');
+      let bd = '';
+      if (sess.newlyKnown.length) bd += `<div class="res-list-row">🎉 Now known: ${pills(sess.newlyKnown)}</div>`;
+      const missed = [...new Set([...sess.wrongWords, ...sess.providedWords])];
+      if (missed.length)   bd += `<div class="res-list-row">Missed today: ${pills(missed)}</div>`;
+      const slow = [...sess.slowWords].filter(w => !missed.includes(w));
+      if (slow.length)     bd += `<div class="res-list-row">Right but slow (over 4 sec): ${pills(slow)}</div>`;
+      document.getElementById('breakdown').innerHTML = bd ? `<div class="res-list">${bd}</div>` : '';
 
       showScreen('screen-results');
     }
@@ -2618,7 +2911,7 @@
           text:   url,
           width:  64,
           height: 64,
-          colorDark:  '#1a1a2e',
+          colorDark:  '#221a4d',
           colorLight: '#ffffff',
           correctLevel: QRCode.CorrectLevel.M
         });
@@ -2656,8 +2949,12 @@
             if (!s.responses)    s.responses = {};
             if (!s.practiceDays) s.practiceDays = [];
             if (!s.notes)        s.notes = [];
+            s.focusWords = Array.isArray(s.focusWords) ? s.focusWords.filter(w => WORDS_ALL.includes(w)) : [];
+            s.knownWords = Array.isArray(s.knownWords) ? s.knownWords.filter(w => WORDS_ALL.includes(w)) : [];
+            s.preKnown   = Array.isArray(s.preKnown)   ? s.preKnown   : [];
+            if (typeof s.stars !== 'number') s.stars = 0;
             if (!s.icon)         s.icon  = '⭐';
-            if (!s.color)        s.color = '#0d9488';
+            if (!s.color)        s.color = '#7c3aed';
             WORDS_ALL.forEach(w => {
               if (!s.history[w])   s.history[w]   = [];
               if (!s.responses[w]) s.responses[w] = [];
@@ -2686,7 +2983,7 @@
 
     function showInfo() {
       document.getElementById('info-points-text').innerHTML =
-        `Students earn points each day they pass a word. The goal of <strong style="color:#fff;">${MAX_POINTS} points</strong> means they've mastered all ${WORDS_ALL.length} words across 3 days each — full Fry-100 fluency.`;
+        `Students earn <strong style="color:#fff;">1 star</strong> for each practice session and <strong style="color:#fff;">3 stars</strong> each time a word becomes known — full Fry-100 fluency.`;
       document.getElementById('info-modal').style.display = 'flex';
     }
     function hideInfo() {
@@ -2696,42 +2993,44 @@
 
   <!-- Info modal -->
   <div id="info-modal" onclick="if(event.target===this) hideInfo()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;align-items:center;justify-content:center;padding:20px;">
-    <div style="background:#1e1e3a;border:2px solid #4e4e80;border-radius:20px;max-width:480px;width:100%;padding:28px 24px;position:relative;max-height:90vh;overflow-y:auto;">
-      <button onclick="hideInfo()" style="position:absolute;top:14px;right:16px;background:none;border:none;color:#9090b8;font-size:1.4rem;cursor:pointer;line-height:1;">✕</button>
-      <h2 style="font-family:'Teachers',sans-serif;font-size:1.3rem;font-weight:800;color:#fff;margin:0 0 16px;">How Fry Words Works</h2>
+    <div style="background:#221a4d;border:2px solid #4c3d8f;border-radius:20px;max-width:480px;width:100%;padding:28px 24px;position:relative;max-height:90vh;overflow-y:auto;">
+      <button onclick="hideInfo()" style="position:absolute;top:14px;right:16px;background:none;border:none;color:#a89ccf;font-size:1.4rem;cursor:pointer;line-height:1;">✕</button>
+      <h2 style="font-family:'Teachers',sans-serif;font-size:1.3rem;font-weight:800;color:#fff;margin:0 0 16px;">How Word Rocket Works</h2>
 
-      <p style="font-family:'Teachers',sans-serif;font-size:.9rem;color:#c8c8e8;line-height:1.6;margin:0 0 14px;">
-        <strong style="color:#fff;">Fry Words</strong> is a fluency tracker for the first 100 Fry instant sight words. It uses spaced practice across days to build automatic, on-sight recognition.
+      <p style="font-family:'Teachers',sans-serif;font-size:.9rem;color:#d6ccf5;line-height:1.6;margin:0 0 14px;">
+        <strong style="color:#fff;">Word Rocket</strong> is a sight word practice app built on the first 100 Fry instant words. It uses spaced practice across days to build automatic, on-sight recognition.
       </p>
 
-      <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#2dd4bf;margin:0 0 8px;">How a session works</h3>
-      <p style="font-family:'Teachers',sans-serif;font-size:.9rem;color:#c8c8e8;line-height:1.6;margin:0 0 14px;">
-        Each session flashes a student a set of words on cards. Tap <strong style="color:#fff;">✓ Correct</strong> if they read it right, <strong style="color:#fff;">✗ Incorrect</strong> if they miss it, or <strong style="color:#fff;">Provided</strong> if you had to tell them the word. Missed words are re-queued a few cards later so the student has to retrieve it again before the session ends. If a student pauses too long on a word, a helper card pops up with an example sentence for context.
+      <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">How a session works</h3>
+      <p style="font-family:'Teachers',sans-serif;font-size:.9rem;color:#d6ccf5;line-height:1.6;margin:0 0 14px;">
+        Each session flashes words on cards. Tap <strong style="color:#fff;">✓ Correct</strong> if the student reads it right within 4 seconds, <strong style="color:#fff;">✗ Incorrect</strong> if they miss it, or <strong style="color:#fff;">answer provided</strong> if you had to tell them. A miss on a new word starts its rehearsal over.
       </p>
 
-      <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#2dd4bf;margin:0 0 8px;">Interleaving</h3>
-      <p style="font-family:'Teachers',sans-serif;font-size:.9rem;color:#c8c8e8;line-height:1.6;margin:0 0 14px;">
-        Instead of repeating one word over and over, each session mixes up to 10 words together in a shuffled order — this is called <strong style="color:#fff;">interleaving</strong>. It feels harder in the moment, but produces stronger, more flexible memory than blocked practice. A couple of already-mastered words are also sprinkled into every session so retention doesn't fade.
+      <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">Interleaving</h3>
+      <p style="font-family:'Teachers',sans-serif;font-size:.9rem;color:#d6ccf5;line-height:1.6;margin:0 0 14px;">
+        Practice uses <strong style="color:#fff;">incremental rehearsal</strong>: a new word is shown, then mixed with one known word, then two, then three, and so on. The known words come up in a random order each round so the student reads the word, not the pattern.
       </p>
 
-      <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#2dd4bf;margin:0 0 8px;">Spaced repetition</h3>
-      <p style="font-family:'Teachers',sans-serif;font-size:.9rem;color:#c8c8e8;line-height:1.6;margin:0 0 14px;">
-        A word moves from <em>Practicing</em> to <em>Known</em> only after a student passes it on <strong style="color:#fff;">3 separate days</strong>. The gaps between those days are the spacing — each retrieval after a little forgetting makes the memory stronger than cramming would.
+      <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">Spaced repetition</h3>
+      <p style="font-family:'Teachers',sans-serif;font-size:.9rem;color:#d6ccf5;line-height:1.6;margin:0 0 14px;">
+        A word becomes <em>Known</em> after the student reads it correctly within 4 seconds, every time it appears, on <strong style="color:#fff;">3 practice days in a row</strong>. One miss or slow read resets the count. Known words keep showing up as the mix-ins for newer words.
       </p>
 
-      <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#2dd4bf;margin:0 0 8px;">Word sets</h3>
-      <p style="font-family:'Teachers',sans-serif;font-size:.9rem;color:#c8c8e8;line-height:1.6;margin:0 0 14px;">
-        Words are introduced in sets of 10, in standard Fry-list frequency order. Students work their current set until it's mastered, then new words are introduced. You can customize the order using the <strong style="color:#fff;">⚙ Word Sets</strong> button.
+      <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">Word sets</h3>
+      <p style="font-family:'Teachers',sans-serif;font-size:.9rem;color:#d6ccf5;line-height:1.6;margin:0 0 14px;">
+        The app never adds words by itself. The teacher tells the family which words to enter under <strong style="color:#fff;">Choose Words</strong>: new words to learn and words the student already knows. The ⚙ Word Sets screen only changes how the word list is grouped.
       </p>
 
-      <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#2dd4bf;margin:0 0 8px;">Points &amp; the goal</h3>
-      <p id="info-points-text" style="font-family:'Teachers',sans-serif;font-size:.9rem;color:#c8c8e8;line-height:1.6;margin:0 0 4px;"></p>
+      <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">Points &amp; the goal</h3>
+      <p id="info-points-text" style="font-family:'Teachers',sans-serif;font-size:.9rem;color:#d6ccf5;line-height:1.6;margin:0 0 4px;"></p>
 
-      <p style="font-family:'Teachers',sans-serif;font-size:.85rem;color:#9090b8;line-height:1.6;margin:18px 0 0;text-align:center;">
-        Have feedback or suggestions? Email <a href="mailto:heathmck@gmail.com" style="color:#5eead4;">heathmck@gmail.com</a>
+      <p style="font-family:'Teachers',sans-serif;font-size:.85rem;color:#a89ccf;line-height:1.6;margin:18px 0 0;text-align:center;">
+        Have feedback or suggestions? Email <a href="mailto:heathmck@gmail.com" style="color:#f0abfc;">heathmck@gmail.com</a>
       </p>
-      <button onclick="hideInfo()" style="margin-top:14px;width:100%;padding:12px;background:#0f766e;border:none;border-radius:12px;color:#fff;font-family:'Teachers',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;">Got it</button>
+      <button onclick="hideInfo()" style="margin-top:14px;width:100%;padding:12px;background:#6d28d9;border:none;border-radius:12px;color:#fff;font-family:'Teachers',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;">Got it</button>
     </div>
   </div>
 </body>
 </html>
+
+</body></html>
