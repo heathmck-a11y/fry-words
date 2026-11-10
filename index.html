@@ -1051,7 +1051,6 @@
       <h1 class="app-title">Word Rocket</h1>
       <p class="app-tagline">🚀 Sight word practice</p>
       <div style="display:flex;gap:8px;justify-content:center;align-items:center;">
-        <button class="btn-settings" onclick="showSettings()" title="Customize word sets">⚙ Word Sets</button>
         <button class="btn-settings btn-info" onclick="showInfo()" title="How this app works">ⓘ</button>
       </div>
     </header>
@@ -1253,7 +1252,7 @@
       <button class="btn-back" onclick="showHome()">← Home</button>
       <h2 class="settings-title">Customize Word Sets</h2>
     </div>
-    <p class="settings-desc">Drag words to reorder them to match your school's scope &amp; sequence. Each row of <span id="set-size-display">10</span> words is one set.</p>
+    <p class="settings-desc">Drag words to reorder them to match your school's scope &amp; sequence. </p>
     <div id="settings-grid" class="settings-grid"></div>
     <div class="settings-actions">
       <button class="btn-primary" onclick="saveWordOrder()">Save Order</button>
@@ -1275,10 +1274,7 @@
       <button id="pick-tab-known" class="known" onclick="setPickMode('known')">Known words</button>
     </div>
     <div class="pick-toolbar">
-      <div class="pick-sort">
-        <button id="pick-sort-set" class="on" onclick="setPickSort('set')">By set</button>
-        <button id="pick-sort-az" onclick="setPickSort('az')">A to Z</button>
-      </div>
+      <span class="pick-count" style="font-size:.8rem;color:var(--soft)">Words A to Z</span>
       <button class="btn-link" onclick="clearPick()">Clear this list</button>
     </div>
     <div class="pick-search">
@@ -1425,22 +1421,11 @@
     // Fixed canonical order — used as the stable key-set for scores/history/grids
     const WORDS_ALL = [...DEFAULT_WORD_ORDER];
 
-    // Customizable practice order, loaded from localStorage if saved
-    let WORD_ORDER = (() => {
-      try {
-        const saved = localStorage.getItem('fryWords_wordOrder');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length === WORDS_ALL.length &&
-              new Set(parsed).size === WORDS_ALL.length &&
-              parsed.every(w => WORDS_ALL.includes(w))) return parsed;
-        }
-      } catch(e) {}
-      return [...DEFAULT_WORD_ORDER];
-    })();
+    // Words are listed alphabetically; the teacher tells families which ones to use
+    const WORD_ORDER = [...WORDS_ALL].sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
     const SESSION_SECS       = 2 * 60;
-    const SET_SIZE           = 10;      // words per set
+    const SET_SIZE           = WORD_ORDER.length; // one group: no sets
     const DAY_STREAK_NEEDED  = 2;       // correct-in-a-row to pass a day
     const DAYS_NEEDED        = 3;       // days needed for mastery
     const KNOWN_REVIEW_COUNT = 2;       // known words sprinkled per set for retention
@@ -1494,7 +1479,7 @@
     let _pickSel = new Set();     // new words to learn
     let _pickKnown = new Set();   // words already known
     let _pickMode = 'learn';
-    let _pickSort = 'set';
+    let _pickSort = 'az';
 
     function setPickMode(m) {
       _pickMode = m;
@@ -1536,8 +1521,6 @@
     }
 
     function renderPicker() {
-      document.getElementById('pick-sort-set').classList.toggle('on', _pickSort === 'set');
-      document.getElementById('pick-sort-az').classList.toggle('on', _pickSort === 'az');
       const grid = document.getElementById('pick-grid');
       grid.innerHTML = '';
       if (_pickSort === 'az') {
@@ -2055,7 +2038,7 @@
           const color = GRAD_COLORS[idx].bg;
           return `<div class="fa-word-card" style="background:${color}" title="${w}: ${idx<6?days+'/'+DAYS_NEEDED+' days':'mastered!'}">${w}</div>`;
         }).join('');
-        setRows += `<div class="fa-set-row"><span class="fa-set-label">Set ${setNum}</span><div class="fa-words-grid" style="margin-bottom:0">${cards}</div></div>`;
+        setRows += `<div class="fa-set-row"><div class="fa-words-grid" style="margin-bottom:0">${cards}</div></div>`;
       }
       return `<div class="fa-gradient-key">${swatches}</div>
         <div class="fa-gradient-labels"><span>Many misses</span><span>Mastered</span></div>
@@ -2078,7 +2061,7 @@
           const dots    = resps.map(r=>`<span class="hist-dot ${r.outcome==='correct'?'correct':r.outcome==='provided'?'provided':'incorrect'}" title="${r.date}: ${r.outcome}"></span>`).join('');
           return `<div class="hist-word-row"><div class="hist-word-badge ${known?'known':''}">${w}</div><div class="hist-counts"><span class="hist-count incorrect">✗ ${wrong}</span><span class="hist-count correct">✓ ${correct}</span></div><div class="hist-dots">${dots}</div></div>`;
         }).join('');
-        setSections += `<div class="hist-set-section"><div class="hist-set-label">Set ${setNum}</div>${rows}</div>`;
+        setSections += `<div class="hist-set-section">${rows}</div>`;
       }
       return `<div style="font-size:.75rem;font-weight:700;color:var(--soft);margin-bottom:12px;display:flex;gap:14px"><span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#dc2626;margin-right:4px;vertical-align:middle"></span>Incorrect</span><span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ea580c;margin-right:4px;vertical-align:middle"></span>Answer provided</span><span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#16a34a;margin-right:4px;vertical-align:middle"></span>Correct</span></div>${setSections}`;
     }
@@ -2178,7 +2161,7 @@
           </div>`;
         });
         html += `<div class="class-letter-section">
-          <div class="class-set-label">Set ${setNum}</div>
+          
           ${rows}
         </div>`;
       }
@@ -2276,7 +2259,7 @@
 
     function showSettings() {
       renderSettingsGrid();
-      document.getElementById('set-size-display').textContent = SET_SIZE;
+
       showScreen('screen-settings');
     }
 
@@ -2441,7 +2424,6 @@
             margin:2px;font-size:12px;font-weight:900;font-family:sans-serif">${w}${badge}</div>`;
         }).join('');
         setRowsHtml += `<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px">
-          <span style="font-size:10px;font-weight:800;color:#64748b;width:36px;text-transform:uppercase;letter-spacing:.05em;padding-top:5px">Set ${setNum}</span>
           <div>${cells}</div>
         </div>`;
       }
@@ -2477,8 +2459,6 @@
           </tr>`;
         }).join('');
         histHtml += `<div style="margin-bottom:16px">
-          <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;
-            color:#6d28d9;border-bottom:2px solid #ede9fe;padding-bottom:4px;margin-bottom:6px">Set ${setNum}</div>
           <table style="width:100%;border-collapse:collapse">${rows}</table>
         </div>`;
       }
@@ -3018,7 +2998,7 @@
 
       <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">Word sets</h3>
       <p style="font-family:'Teachers',sans-serif;font-size:.9rem;color:#d6ccf5;line-height:1.6;margin:0 0 14px;">
-        The app never adds words by itself. The teacher tells the family which words to enter under <strong style="color:#fff;">Choose Words</strong>: new words to learn and words the student already knows. The ⚙ Word Sets screen only changes how the word list is grouped.
+        The app never adds words by itself. The teacher tells the family which words to enter under <strong style="color:#fff;">Choose Words</strong>: new words to learn and words the student already knows. Words are listed A to Z.
       </p>
 
       <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">Points &amp; the goal</h3>
