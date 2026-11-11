@@ -1722,6 +1722,9 @@
     function targetWords(s) {
       return WORD_ORDER.filter(w => (s.focusWords||[]).includes(w) && s.scores[w] !== 'known');
     }
+    // Each new word earns its star in 3 steps, one per practice day passed
+    function stepGlyphs(n) { n = Math.max(0, Math.min(DAYS_NEEDED, n)); return '★'.repeat(n) + '☆'.repeat(DAYS_NEEDED - n); }
+    function stepsEarned(s) { return targetWords(s).reduce((a, w) => a + Math.min(passedDays(s, w), DAYS_NEEDED - 1), 0); }
     function starCount(s) { return WORDS_ALL.filter(w => s.scores[w] === 'known').length; }
     function knownPool(s) {
       const set = new Set([...(s.knownWords||[]), ...(s.focusWords||[])]);
@@ -1801,10 +1804,11 @@
 
       const targets = targetWords(student), knowns = knownPool(student);
       const stars = starCount(student);
-      const ratio = stars / WORDS_ALL.length;
+      const steps = stepsEarned(student);
+      const ratio = Math.min(1, (stars + steps / DAYS_NEEDED) / WORDS_ALL.length);
       document.getElementById('dash-stars').innerHTML = `${stars} ⭐ <small>of ${WORDS_ALL.length}</small>`;
       document.getElementById('dash-progress').textContent =
-        targets.length ? `${targets.length} new word${targets.length === 1 ? '' : 's'} on the way` : (knowns.length ? 'Ready for new words' : 'No words chosen yet');
+        targets.length ? `${steps} of ${targets.length * DAYS_NEEDED} steps toward ${targets.length} new star${targets.length === 1 ? '' : 's'}` : (knowns.length ? 'Ready for new words' : 'No words chosen yet');
       document.getElementById('star-fill').style.width = (ratio * 100) + '%';
       document.getElementById('star-rocket').style.left = (ratio * 100) + '%';
       document.getElementById('dash-points').textContent = (student.points || 0) + ' pts';
@@ -1830,7 +1834,7 @@
         const status = student.scores[w];
         const days   = passedDays(student, w);
         cell.className = `word-pill ${status}`;
-        cell.innerHTML = escHtml(w) + (status === 'known' ? '' : `<span class="days">${days}/${DAYS_NEEDED}</span>`);
+        cell.innerHTML = escHtml(w) + (status === 'known' ? '' : `<span class="days">${stepGlyphs(days)}</span>`);
         cell.title = status==='known' ? `${w}: known` : `${w}: ${days} of ${DAYS_NEEDED} days in a row`;
         grid.appendChild(cell);
       });
@@ -1934,6 +1938,8 @@
             student.scores[w] = 'known';
             sess.newlyKnown.push(w);
             bonus += PTS_KNOWN;
+          } else if (passed && !wasPassedToday) {
+            sess.stepWords.push(w);
           }
         }
       });
@@ -1992,6 +1998,7 @@
         dayPass:         {},
         slowWords:       new Set(),
         newlyKnown:      [],
+        stepWords:       [],
         points:          0,
         cardIndex:       0,
         totalCorrect:    0, totalWrong:    0, totalProvided: 0,
@@ -2858,7 +2865,7 @@
       ptsEl.textContent = ptsEarned;
       ptsEl.classList.toggle('has-points', ptsEarned > 0);
       document.getElementById('res-pts-total').innerHTML =
-        `Total: <strong>${ptsNow} points</strong>` + (sess.newlyKnown.length ? ` · <strong>+${sess.newlyKnown.length} ⭐</strong>` : '');
+        `Total: <strong>${ptsNow} points</strong>` + (sess.newlyKnown.length ? ` · <strong>+${sess.newlyKnown.length} ⭐</strong>` : (sess.stepWords.length ? ` · <strong>+${sess.stepWords.length} step${sess.stepWords.length === 1 ? '' : 's'} toward a ⭐</strong>` : ''));
 
       const confettiEl = document.getElementById('res-confetti');
       if (sess.newlyKnown.length) confettiEl.textContent = '🎉 🏆 🎉';
@@ -2889,6 +2896,7 @@
       const pills = ws => ws.map(w => `<span class="word-pill learning">${escHtml(w)}</span>`).join(' ');
       let bd = '';
       if (sess.newlyKnown.length) bd += `<div class="res-list-row">🎉 Now known: ${pills(sess.newlyKnown)}</div>`;
+      if (sess.stepWords.length) bd += `<div class="res-list-row">⭐ Closer to a star: ${sess.stepWords.map(w => `<span class="word-pill learning">${escHtml(w)} ${stepGlyphs(passedDays(student, w))}</span>`).join(' ')}</div>`;
       const missed = [...new Set([...sess.wrongWords, ...sess.providedWords])];
       if (missed.length)   bd += `<div class="res-list-row">Missed today: ${pills(missed)}</div>`;
       const slow = [...sess.slowWords].filter(w => !missed.includes(w));
@@ -3034,7 +3042,7 @@
 
     function showInfo() {
       document.getElementById('info-points-text').innerHTML =
-        `Every known word is a <strong style="color:#fff;">star</strong>, so the goal is 100 stars: one for each of the 100 words. Points come as they practice: 1 for any word read right, 2 for a new word read right within 4 seconds, 5 when a new word passes a practice day, and 20 when a word becomes known.`;
+        `Every known word is a <strong style="color:#fff;">star</strong>, so the goal is 100 stars: one for each of the 100 words. A new word earns its star in 3 steps, one each practice day it is read right within 4 seconds every time (★☆☆, ★★☆, then the star). Points come as they practice: 1 for any word read right, 2 for a new word read right within 4 seconds, 5 when a new word passes a practice day, and 20 when a word becomes known.`;
       document.getElementById('info-modal').style.display = 'flex';
     }
     function hideInfo() {
