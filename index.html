@@ -802,6 +802,25 @@
     .pick-tile.known-on { background: var(--green); border-color: var(--green); color: #06210f; }
     .pick-tile.other { opacity: .45; }
     .stars-big { font-size: 2.8rem; font-weight: 700; color: #fbbf24; line-height: 1; }
+    .stars-big small { font-size: 1.1rem; color: var(--soft); font-weight: 800; }
+    .star-track { position: relative; height: 14px; border-radius: 100px; background: #2d2363; border: 2px solid #4c3d8f; margin-top: 14px; }
+    .star-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, #7c3aed, #fbbf24); transition: width .6s; }
+    .star-rocket { position: absolute; top: -14px; font-size: 1.4rem; transform: translateX(-50%); transition: left .6s; }
+    .star-moon { position: absolute; right: -6px; top: -12px; font-size: 1.2rem; }
+    .points-row { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: .85rem; font-weight: 800; color: var(--soft); }
+    .points-row b { color: #f0abfc; font-size: 1.1rem; }
+    .sess-points {
+      font-size: 1rem; font-weight: 800; color: #fbbf24; background: #2d2363; border: 2px solid #4c3d8f;
+      padding: 8px 12px; border-radius: 100px; white-space: nowrap;
+    }
+    .sess-points.bump { animation: ptsBump .35s ease; }
+    @keyframes ptsBump { 0% { transform: scale(1) } 40% { transform: scale(1.25); background: #fbbf24; color: #2a1a00; } 100% { transform: scale(1) } }
+    .pts-float {
+      position: fixed; left: 50%; top: 40%; transform: translateX(-50%); pointer-events: none; z-index: 50;
+      font-size: 1.6rem; font-weight: 900; color: #fbbf24; text-shadow: 0 2px 8px rgba(0,0,0,.5);
+      animation: ptsFloat .8s ease-out forwards;
+    }
+    @keyframes ptsFloat { 0% { opacity: 1; transform: translate(-50%, 0) } 100% { opacity: 0; transform: translate(-50%, -70px) } }
     .stars-sub { font-size: .8rem; font-weight: 700; color: var(--soft); margin-top: 4px; }
     .res-list { margin: 12px 0; text-align: left; }
     .res-list-row { font-size: .9rem; font-weight: 700; color: #e4ddff; margin: 6px 0; }
@@ -1110,7 +1129,7 @@
         <button class="btn-begin" onclick="showDurationPicker()">🚀 Blast Off</button>
       </div>
     </div>
-    <span id="points-goal-label" class="points-label">SCORE</span>
+    <span id="points-goal-label" class="points-label">STARS</span>
     <div class="points-section">
       <div class="points-body">
         <svg class="pie-svg" viewBox="0 0 90 90">
@@ -1123,11 +1142,17 @@
           <circle cx="45" cy="45" r="44" fill="#2d2363"/>
           <path id="dash-pie" fill="url(#pieGrad)" d="M45,45 L45,1"/>
         </svg>
-        <div>
-          <div id="dash-stars" class="stars-big">0 ⭐</div>
+        <div style="flex:1">
+          <div id="dash-stars" class="stars-big">0 ⭐ <small>of 100</small></div>
           <div id="dash-progress" class="stars-sub"></div>
         </div>
       </div>
+      <div class="star-track">
+        <div id="star-fill" class="star-fill" style="width:0%"></div>
+        <span id="star-rocket" class="star-rocket" style="left:0%">🚀</span>
+        <span class="star-moon">🌙</span>
+      </div>
+      <div class="points-row"><span>Points</span><b id="dash-points">0</b></div>
     </div>
 
     <div class="streak-section">
@@ -1172,7 +1197,7 @@
   <div id="screen-session" class="screen">
     <div class="session-topbar">
       <button class="btn-back" onclick="endSession()">← End Session Early</button>
-      <span id="sess-student" style="font-weight:800;font-size:1rem;"></span>
+      <span id="sess-points" class="sess-points">0 pts</span>
       <button id="btn-pause" class="btn-pause" onclick="pauseSession()">Pause</button>
     </div>
 
@@ -1379,9 +1404,9 @@
 
       <div class="points-celebration">
         <div id="res-confetti" class="confetti-row">⭐ ⭐ ⭐</div>
-        <div class="pts-earned-label">Stars earned today</div>
+        <div class="pts-earned-label">Points earned today</div>
         <div id="res-pts-earned" class="pts-earned-number">0</div>
-        <div class="pts-earned-unit">stars</div>
+        <div class="pts-earned-unit">points</div>
         <div id="res-pts-total" class="pts-total-row"></div>
       </div>
       <div id="breakdown" class="breakdown"></div>
@@ -1399,7 +1424,7 @@
         </svg>
         <div class="res-pie-label">
           <span id="res-pie-pct" class="res-pie-pct">0%</span>
-          <span class="res-pie-sub">of this list known</span>
+          <span class="res-pie-sub">of 100 words known</span>
         </div>
       </div>
 
@@ -1450,8 +1475,11 @@
     const IDLE_SECS           = 5;      // seconds before idle overlay appears
     const FLUENT_MS           = 4000;   // a correct read must come within 4 seconds to count
     const IR_MAX_KNOWN        = 9;      // known words folded in around each new word
-    const STARS_SESSION       = 1;      // star for finishing a practice session
-    const STARS_WORD          = 3;      // stars when a word becomes known
+    // Stars: one per known word, out of all 100. Points: earned as they go.
+    const PTS_CORRECT         = 1;      // any word read correctly
+    const PTS_NEW_CORRECT     = 2;      // a new word read correctly within 4 seconds (instead of 1)
+    const PTS_DAY_PASSED      = 5;      // a new word passes a practice day
+    const PTS_KNOWN           = 20;     // a word becomes known
 
     // -- App state ------------------------------------------
     let state = {
@@ -1694,6 +1722,7 @@
     function targetWords(s) {
       return WORD_ORDER.filter(w => (s.focusWords||[]).includes(w) && s.scores[w] !== 'known');
     }
+    function starCount(s) { return WORDS_ALL.filter(w => s.scores[w] === 'known').length; }
     function knownPool(s) {
       const set = new Set([...(s.knownWords||[]), ...(s.focusWords||[])]);
       return WORD_ORDER.filter(w => set.has(w) && s.scores[w] === 'known');
@@ -1727,7 +1756,7 @@
         li.innerHTML = `
           <div class="student-left" onclick="selectStudent('${student.id}')">
             <span class="student-name"><span class="student-icon">${student.icon||'⭐'}</span>${escHtml(student.name)}</span>
-            <span class="progress-badge">${(() => { const k = knownPool(student).length, t = targetWords(student).length; return (k + t) ? `${k}/${k + t} known · ${student.stars || 0} ⭐` : 'No words chosen yet'; })()}</span>
+            <span class="progress-badge">${(() => { const k = knownPool(student).length, t = targetWords(student).length; return (k + t) ? `${starCount(student)} ⭐ · ${student.points || 0} pts` : 'No words chosen yet'; })()}</span>
           </div>
           <button class="btn-customize-inline" onclick="event.stopPropagation();state.currentStudentId='${student.id}';showCustomize()">✏</button>
           <span class="student-arrow" onclick="selectStudent('${student.id}')">›</span>
@@ -1771,11 +1800,14 @@
         : '';
 
       const targets = targetWords(student), knowns = knownPool(student);
-      const listTotal = targets.length + knowns.length;
-      const ratio = listTotal ? knowns.length / listTotal : 0;
-      document.getElementById('dash-stars').textContent = (student.stars || 0) + ' ⭐';
+      const stars = starCount(student);
+      const ratio = stars / WORDS_ALL.length;
+      document.getElementById('dash-stars').innerHTML = `${stars} ⭐ <small>of ${WORDS_ALL.length}</small>`;
       document.getElementById('dash-progress').textContent =
-        listTotal ? `${knowns.length} of ${listTotal} words on this list known` : 'No words chosen yet';
+        targets.length ? `${targets.length} new word${targets.length === 1 ? '' : 's'} on the way` : (knowns.length ? 'Ready for new words' : 'No words chosen yet');
+      document.getElementById('star-fill').style.width = (ratio * 100) + '%';
+      document.getElementById('star-rocket').style.left = (ratio * 100) + '%';
+      document.getElementById('dash-points').textContent = (student.points || 0) + ' pts';
       const cx=45, cy=45, r=44;
       const angle = ratio * 2 * Math.PI;
       const x = cx + r * Math.sin(angle);
@@ -1885,26 +1917,30 @@
       if (!sess || !student) return 0;
       const t = today();
       if (!student.history) student.history = {};
-      if (!student.stars)   student.stars = 0;
-      let starsEarned = 0;
+      if (!student.points)  student.points = 0;
+      let bonus = 0;
 
       sess.practicedWords.forEach(w => {
         if (!student.history[w]) student.history[w] = [];
         const passed   = sess.dayPass[w] !== false;
         const existing = student.history[w].find(e => e.date === t);
+        const wasPassedToday = existing && existing.passed;
         if (existing) existing.passed = existing.passed && passed;
         else student.history[w].push({ date: t, passed });
 
-        if (student.scores[w] !== 'known' && passedDays(student, w) >= DAYS_NEEDED) {
-          student.scores[w] = 'known';
-          sess.newlyKnown.push(w);
-          starsEarned += STARS_WORD;
+        if (student.scores[w] !== 'known') {
+          if (passed && !wasPassedToday) bonus += PTS_DAY_PASSED;
+          if (passedDays(student, w) >= DAYS_NEEDED) {
+            student.scores[w] = 'known';
+            sess.newlyKnown.push(w);
+            bonus += PTS_KNOWN;
+          }
         }
       });
 
-      if (sess.practicedWords.size) starsEarned += STARS_SESSION;
-      student.stars += starsEarned;
-      return starsEarned;
+      student.points += bonus;
+      sess.points += bonus;
+      return sess.points;
     }
 
     // ========================================================
@@ -1956,6 +1992,7 @@
         dayPass:         {},
         slowWords:       new Set(),
         newlyKnown:      [],
+        points:          0,
         cardIndex:       0,
         totalCorrect:    0, totalWrong:    0, totalProvided: 0,
         correctWords:    new Set(), wrongWords: new Set(), providedWords: new Set(),
@@ -1967,6 +2004,7 @@
         cardShownAt:     0,
       };
       showScreen('screen-session');
+      renderSessPoints();
       renderCard();
       startTimer();
     }
@@ -2184,11 +2222,11 @@
 
     function renderClassByStudent() {
       const panel    = document.getElementById('classpanel-students');
-      const students = [...state.students].sort((a,b) => (b.stars||0) - (a.stars||0));
+      const students = [...state.students].sort((a,b) => starCount(b) - starCount(a));
       if (!students.length) { panel.innerHTML = '<div class="class-empty">No students yet.</div>'; return; }
 
       const rows = students.map(s => {
-        const pts  = (s.stars||0) + ' ⭐';
+        const pts  = starCount(s) + ' ⭐ · ' + (s.points||0) + ' pts';
         const { known, learning } = countScores(s);
         const knownPct    = Math.round(known/WORDS_ALL.length*100);
         const learningPct = Math.round(learning/WORDS_ALL.length*100);
@@ -2408,9 +2446,8 @@
       if (!student) return;
 
       const today_str = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
-      const pts       = student.stars || 0;
-      const _tw = targetWords(student), _kp = knownPool(student);
-      const pct       = (_tw.length + _kp.length) ? Math.round(_kp.length / (_tw.length + _kp.length) * 100) : 0;
+      const pts       = student.points || 0;
+      const pct       = starCount(student);
 
       const gridCells = WORD_ORDER.map(w => {
         const s = student.scores[w];
@@ -2500,8 +2537,8 @@
             <div class="meta">${student.name} &nbsp;·&nbsp; ${today_str}</div>
           </div>
           <div style="text-align:right">
-            <div style="font-size:28px;font-weight:900;color:#6d28d9">${pts} stars</div>
-            <div style="font-size:10px;color:#94a3b8;font-weight:700">${pct}% of chosen list known</div>
+            <div style="font-size:28px;font-weight:900;color:#6d28d9">${pct} ⭐ of 100</div>
+            <div style="font-size:10px;color:#94a3b8;font-weight:700">${pts} points</div>
           </div>
         </div>
 
@@ -2683,6 +2720,24 @@
       }
     }
 
+    function awardPoints(n) {
+      const sess = state.session, student = currentStudent();
+      if (!sess || !student || !n) return;
+      sess.points += n;
+      student.points = (student.points || 0) + n;
+      renderSessPoints(true);
+      const f = document.createElement('div');
+      f.className = 'pts-float'; f.textContent = '+' + n;
+      document.body.appendChild(f);
+      f.addEventListener('animationend', () => f.remove());
+    }
+    function renderSessPoints(bump) {
+      const el = document.getElementById('sess-points');
+      if (!el || !state.session) return;
+      el.textContent = state.session.points + ' pts';
+      if (bump) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+    }
+
     // ========================================================
     // SESSION - RESPOND  ('correct' | 'incorrect' | 'provided')
     // ========================================================
@@ -2728,6 +2783,9 @@
           // Right, but too slow to count toward "known" today
           sess.slowWords.add(word);
           sess.dayPass[word] = false;
+          awardPoints(PTS_CORRECT);
+        } else {
+          awardPoints(item.target ? PTS_NEW_CORRECT : PTS_CORRECT);
         }
         sess.cardIndex++;
       } else {
@@ -2772,12 +2830,11 @@
       document.getElementById('res-emoji').textContent  = emoji;
       document.getElementById('res-name').textContent   = student ? student.name : '';
 
-      const ptsNow = student ? (student.stars || 0) : 0;
-      const tw = student ? targetWords(student) : [], kp = student ? knownPool(student) : [];
-      const listTotal = tw.length + kp.length;
+      const ptsNow = student ? (student.points || 0) : 0;
+      const stars = student ? starCount(student) : 0;
 
       (() => {
-        const ratio = listTotal ? kp.length / listTotal : 0;
+        const ratio = stars / WORDS_ALL.length;
         const cx=45, cy=45, r=44;
         const angle = ratio * 2 * Math.PI;
         const x = cx + r * Math.sin(angle), y = cy - r * Math.cos(angle);
@@ -2787,7 +2844,7 @@
           : ratio <= 0 ? `M${cx},${cy}`
           : `M${cx},${cy} L${cx},${cy-r} A${r},${r} 0 ${largeArc},1 ${x},${y} Z`;
         document.getElementById('res-pie').setAttribute('d', d);
-        document.getElementById('res-pie-pct').textContent = Math.round(ratio * 100) + '%';
+        document.getElementById('res-pie-pct').textContent = stars + ' ⭐';
         if (student) {
           const g = document.getElementById('resPieGrad');
           if (g) {
@@ -2801,11 +2858,11 @@
       ptsEl.textContent = ptsEarned;
       ptsEl.classList.toggle('has-points', ptsEarned > 0);
       document.getElementById('res-pts-total').innerHTML =
-        `Total: <strong>${ptsNow} ⭐</strong>`;
+        `Total: <strong>${ptsNow} points</strong>` + (sess.newlyKnown.length ? ` · <strong>+${sess.newlyKnown.length} ⭐</strong>` : '');
 
       const confettiEl = document.getElementById('res-confetti');
-      if (ptsEarned >= 7)       confettiEl.textContent = '🎉 🏆 🎉';
-      else if (ptsEarned >= 4)  confettiEl.textContent = '🌟 🏅 🌟';
+      if (sess.newlyKnown.length) confettiEl.textContent = '🎉 🏆 🎉';
+      else if (ptsEarned >= 30) confettiEl.textContent = '🌟 🏅 🌟';
       else if (ptsEarned > 0)   confettiEl.textContent = '⭐ ⭐ ⭐';
       else                      confettiEl.textContent = '💪 💪 💪';
 
@@ -2946,7 +3003,7 @@
             s.focusWords = Array.isArray(s.focusWords) ? s.focusWords.filter(w => WORDS_ALL.includes(w)) : [];
             s.knownWords = Array.isArray(s.knownWords) ? s.knownWords.filter(w => WORDS_ALL.includes(w)) : [];
             s.preKnown   = Array.isArray(s.preKnown)   ? s.preKnown   : [];
-            if (typeof s.stars !== 'number') s.stars = 0;
+            if (typeof s.points !== 'number') s.points = 0;
             if (!s.icon)         s.icon  = '⭐';
             if (!s.color)        s.color = '#7c3aed';
             WORDS_ALL.forEach(w => {
@@ -2977,7 +3034,7 @@
 
     function showInfo() {
       document.getElementById('info-points-text').innerHTML =
-        `Students earn <strong style="color:#fff;">1 star</strong> for each practice session and <strong style="color:#fff;">3 stars</strong> each time a word becomes known — full Fry-100 fluency.`;
+        `Every known word is a <strong style="color:#fff;">star</strong>, so the goal is 100 stars: one for each of the 100 words. Points come as they practice: 1 for any word read right, 2 for a new word read right within 4 seconds, 5 when a new word passes a practice day, and 20 when a word becomes known.`;
       document.getElementById('info-modal').style.display = 'flex';
     }
     function hideInfo() {
