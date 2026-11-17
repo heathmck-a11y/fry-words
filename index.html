@@ -342,7 +342,12 @@
       font-size: .95rem; font-weight: 600; color: #134e4a;
       line-height: 1.6; margin-bottom: 14px; text-align: center;
     }
-    .prompt-instruction strong { color: #6d28d9; font-weight: 700; }
+    .prompt-instruction strong { color: #6d28d9; font-weight: 700; line-height: 1.5; }
+    .prompt-instruction em { color: #6d28d9; font-style: normal; font-weight: 900; }
+    .readsecs-row { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+    .readsecs-label { width: 100%; text-align: center; font-size: .8rem; font-weight: 800; color: var(--soft); text-transform: uppercase; letter-spacing: .06em; }
+    .btn-readsecs { font: inherit; font-weight: 800; padding: 8px 18px; border-radius: 100px; border: 2px solid var(--border); background: #fff; color: var(--soft); cursor: pointer; }
+    .btn-readsecs[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
     .btn-confirm {
       display: inline-block; padding: 14px 28px;
       background: var(--accent); color: #fff; border: none;
@@ -1234,6 +1239,10 @@
   <div id="duration-overlay" class="duration-overlay">
     <div class="duration-box">
       <h3 class="duration-title">How long?</h3>
+      <div class="readsecs-row"><span class="readsecs-label">Time to read each word</span>
+        <button class="btn-readsecs" data-readsecs="3" aria-pressed="false" onclick="setReadSecs(3)">3 sec</button>
+        <button class="btn-readsecs" data-readsecs="4" aria-pressed="true" onclick="setReadSecs(4)">4 sec</button>
+      </div>
       <div class="duration-btns">
         <button class="btn-duration" onclick="beginWithDuration(1)"><span class="dur-num">1</span><span class="dur-unit">min</span></button>
         <button class="btn-duration" onclick="beginWithDuration(2)"><span class="dur-num">2</span><span class="dur-unit">min</span></button>
@@ -1472,12 +1481,26 @@
     const PTS_MASTERY        = 10;      // points for mastery day
     const MAX_POINTS         = WORDS_ALL.length * (PTS_PER_PASS * 2 + PTS_MASTERY); // 2000
     const CIRC                = 2 * Math.PI * 41; // SVG timer arc circumference (r=41)
-    const IDLE_SECS           = 5;      // seconds before idle overlay appears
-    const FLUENT_MS           = 4000;   // a correct read must come within 4 seconds to count
+    // Time to read a word: the grown-up picks 3 or 4 seconds when starting a session (remembered on this device).
+    // It is both how long the card waits before the "this is the word" prompt, and the limit for a read to count as fluent.
+    let readSecs = (() => { try { const v = Number(localStorage.getItem('wordRocket.readSecs')); return v === 3 ? 3 : 4; } catch (e) { return 4; } })();
+    const idleMs   = () => readSecs * 1000;
+    const fluentMs = () => readSecs * 1000;
+    function setReadSecs(n) {
+      readSecs = n === 3 ? 3 : 4;
+      try { localStorage.setItem('wordRocket.readSecs', String(readSecs)); } catch (e) { /* remembered for this visit only */ }
+      document.querySelectorAll('[data-readsecs]').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.readsecs) === readSecs)));
+    }
+    // What the grown-up says when the word was not read in time or was missed
+    function setPromptScript(word) {
+      const w = String(word).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+      document.getElementById('prompt-cta').innerHTML =
+        `Say: <br>"This is the word <em>${w}</em>."<br>"Read <em>${w}</em>."<br>"Spell <em>${w}</em>."<br>"Read <em>${w}</em>."`;
+    }
     const IR_MAX_KNOWN        = 9;      // known words folded in around each new word
     // Stars: one per known word, out of all 100. Points: earned as they go.
     const PTS_CORRECT         = 1;      // any word read correctly
-    const PTS_NEW_CORRECT     = 2;      // a new word read correctly within 4 seconds (instead of 1)
+    const PTS_NEW_CORRECT     = 2;      // a new word read correctly within the set time (3 or 4 seconds) (instead of 1)
     const PTS_DAY_PASSED      = 5;      // a new word passes a practice day
     const PTS_KNOWN           = 20;     // a word becomes known
 
@@ -1710,7 +1733,7 @@
       return { known, learning, unseen };
     }
 
-    // Days in a row (most recent first) on which the word was read correctly within 4 seconds every time
+    // Days in a row (most recent first) on which the word was read correctly within the set time (3 or 4 seconds) every time
     function passedDays(student, word) {
       const h = ((student.history||{})[word]||[]);
       let n = 0;
@@ -2599,6 +2622,7 @@
     // DURATION PICKER
     // ========================================================
     function showDurationPicker() {
+      setReadSecs(readSecs);
       document.getElementById('duration-overlay').classList.add('visible');
     }
     function closeDurationPicker() {
@@ -2696,7 +2720,7 @@
       _idleTimer = setTimeout(() => {
         const word = state.session.queue[state.session.cardIndex].w;
         document.getElementById('prompt-word').textContent = word;
-        document.getElementById('prompt-cta').textContent = 'Read the word aloud.';
+        setPromptScript(word);
         document.getElementById('prompt-done-btn').textContent = 'Done - answer provided';
         _promptMode = 'idle';
         document.getElementById('prompt-overlay').classList.add('visible');
@@ -2704,7 +2728,7 @@
           clearInterval(state.session.timerInterval);
           state.session.timerInterval = null;
         }
-      }, IDLE_SECS * 1000);
+      }, idleMs());
     }
 
     function clearIdleTimer() {
@@ -2715,7 +2739,6 @@
 
     function handlePromptDone() {
       document.getElementById('prompt-overlay').classList.remove('visible');
-      document.getElementById('prompt-cta').textContent = 'Read the word aloud.';
       document.getElementById('prompt-done-btn').textContent = 'Done - answer provided';
       if (state.session && !state.session.timerInterval) startTimer();
       const mode = _promptMode;
@@ -2760,7 +2783,7 @@
       if (outcome === 'incorrect') {
         document.getElementById('prompt-word').textContent = word;
         _promptMode = 'incorrect';
-        document.getElementById('prompt-cta').textContent = 'Review the word with the student, then tap Done.';
+        setPromptScript(word);
         document.getElementById('prompt-done-btn').textContent = 'Done';
         document.getElementById('prompt-overlay').classList.add('visible');
         if (state.session && state.session.timerInterval) {
@@ -2786,7 +2809,7 @@
       if (outcome === 'correct') {
         sess.totalCorrect++;
         sess.correctWords.add(word);
-        if (responseTime > FLUENT_MS) {
+        if (responseTime > fluentMs()) {
           // Right, but too slow to count toward "known" today
           sess.slowWords.add(word);
           sess.dayPass[word] = false;
@@ -3042,7 +3065,7 @@
 
     function showInfo() {
       document.getElementById('info-points-text').innerHTML =
-        `Every known word is a <strong style="color:#fff;">star</strong>, so the goal is 100 stars: one for each of the 100 words. A new word earns its star in 3 steps, one each practice day it is read right within 4 seconds every time (★☆☆, ★★☆, then the star). Points come as they practice: 1 for any word read right, 2 for a new word read right within 4 seconds, 5 when a new word passes a practice day, and 20 when a word becomes known.`;
+        `Every known word is a <strong style="color:#fff;">star</strong>, so the goal is 100 stars: one for each of the 100 words. A new word earns its star in 3 steps, one each practice day it is read right within the set time (3 or 4 seconds) every time (★☆☆, ★★☆, then the star). Points come as they practice: 1 for any word read right, 2 for a new word read right within the set time (3 or 4 seconds), 5 when a new word passes a practice day, and 20 when a word becomes known.`;
       document.getElementById('info-modal').style.display = 'flex';
     }
     function hideInfo() {
@@ -3062,7 +3085,7 @@
 
       <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">How a session works</h3>
       <p style="font-family:'Teachers',sans-serif;font-size:.9rem;color:#d6ccf5;line-height:1.6;margin:0 0 14px;">
-        Each session flashes words on cards. Tap <strong style="color:#fff;">✓ Correct</strong> if the student reads it right within 4 seconds, <strong style="color:#fff;">✗ Incorrect</strong> if they miss it, or <strong style="color:#fff;">answer provided</strong> if you had to tell them. A miss on a new word starts its rehearsal over.
+        Each session flashes words on cards. Tap <strong style="color:#fff;">✓ Correct</strong> if the student reads it right within the set time (3 or 4 seconds), <strong style="color:#fff;">✗ Incorrect</strong> if they miss it, or <strong style="color:#fff;">answer provided</strong> if you had to tell them. A miss on a new word starts its rehearsal over.
       </p>
 
       <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">Interleaving</h3>
@@ -3072,7 +3095,7 @@
 
       <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">Spaced repetition</h3>
       <p style="font-family:'Teachers',sans-serif;font-size:.9rem;color:#d6ccf5;line-height:1.6;margin:0 0 14px;">
-        A word becomes <em>Known</em> after the student reads it correctly within 4 seconds, every time it appears, on <strong style="color:#fff;">3 practice days in a row</strong>. One miss or slow read resets the count. Known words keep showing up as the mix-ins for newer words.
+        A word becomes <em>Known</em> after the student reads it correctly within the set time (3 or 4 seconds), every time it appears, on <strong style="color:#fff;">3 practice days in a row</strong>. One miss or slow read resets the count. Known words keep showing up as the mix-ins for newer words.
       </p>
 
       <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">Word sets</h3>
