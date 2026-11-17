@@ -329,18 +329,18 @@
     .prompt-overlay.visible { display: flex; }
     .prompt-box {
       background: #fff; border-radius: 24px;
-      padding: 24px 26px; max-width: 380px; width: 100%;
+      padding: 24px 26px; max-width: 520px; width: 100%;
       text-align: center; box-shadow: 0 12px 48px rgba(0,0,0,.4);
       max-height: 88vh; overflow-y: auto;
     }
     .prompt-word {
-      font-size: clamp(2.2rem, 10vw, 3.2rem); font-weight: 700; line-height: 1;
+      font-size: clamp(4.5rem, 24vw, 8rem); font-weight: 700; line-height: 1;
       font-family: 'Teachers', sans-serif;
-      color: #221a4d; margin-bottom: 16px; word-break: break-word;
+      color: #221a4d; margin-bottom: 18px; word-break: break-word;
     }
     .prompt-instruction {
-      font-size: .95rem; font-weight: 600; color: #134e4a;
-      line-height: 1.6; margin-bottom: 14px; text-align: center;
+      font-size: .8rem; font-weight: 600; color: #134e4a;
+      line-height: 1.45; margin-bottom: 12px; text-align: center;
     }
     .prompt-instruction strong { color: #6d28d9; font-weight: 700; line-height: 1.5; }
     .prompt-instruction em { color: #6d28d9; font-style: normal; font-weight: 900; }
@@ -1495,7 +1495,7 @@
     function setPromptScript(word) {
       const w = String(word).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
       document.getElementById('prompt-cta').innerHTML =
-        `Say: <br>"This is the word <em>${w}</em>."<br>"Read <em>${w}</em>."<br>"Spell <em>${w}</em>."<br>"Read <em>${w}</em>."`;
+        `Say: <br>"This is <em>${w}</em>."<br>"Say <em>${w}</em>."<br>"What are the sounds in <em>${w}</em>?"<br>"Spell <em>${w}</em>."<br>"What word?"`;
     }
     const IR_MAX_KNOWN        = 9;      // known words folded in around each new word
     // Stars: one per known word, out of all 100. Points: earned as they go.
@@ -2755,17 +2755,12 @@
       if (!sess || !student || !n) return;
       sess.points += n;
       student.points = (student.points || 0) + n;
-      renderSessPoints(true);
-      const f = document.createElement('div');
-      f.className = 'pts-float'; f.textContent = '+' + n;
-      document.body.appendChild(f);
-      f.addEventListener('animationend', () => f.remove());
+      renderSessPoints();   // the total at the top updates quietly: no floating +points, no flash
     }
     function renderSessPoints(bump) {
       const el = document.getElementById('sess-points');
       if (!el || !state.session) return;
       el.textContent = state.session.points + ' pts';
-      if (bump) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
     }
 
     // ========================================================
