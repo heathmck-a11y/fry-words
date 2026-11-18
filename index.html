@@ -1855,7 +1855,7 @@
       const ratio = Math.min(1, (stars + steps / DAYS_NEEDED) / WORDS_ALL.length);
       document.getElementById('dash-stars').innerHTML = `${stars} ⭐ <small>of ${WORDS_ALL.length}</small>`;
       document.getElementById('dash-progress').textContent =
-        targets.length ? `${steps} of ${targets.length * DAYS_NEEDED} steps toward ${targets.length} new star${targets.length === 1 ? '' : 's'}` : (knowns.length ? 'Ready for new words' : 'No words chosen yet');
+        targets.length ? `Working on ${targets.length} new word${targets.length === 1 ? '' : 's'}` : (knowns.length ? 'Ready for new words' : 'No words chosen yet');
       document.getElementById('star-fill').style.width = (ratio * 100) + '%';
       document.getElementById('star-rocket').style.left = (ratio * 100) + '%';
       document.getElementById('dash-points').textContent = (student.points || 0) + ' pts';
@@ -2918,7 +2918,7 @@
       ptsEl.textContent = ptsEarned;
       ptsEl.classList.toggle('has-points', ptsEarned > 0);
       document.getElementById('res-pts-total').innerHTML =
-        `Total: <strong>${ptsNow} points</strong>` + (sess.newlyKnown.length ? ` · <strong>+${sess.newlyKnown.length} ⭐</strong>` : (sess.stepWords.length ? ` · <strong>+${sess.stepWords.length} step${sess.stepWords.length === 1 ? '' : 's'} toward a ⭐</strong>` : ''));
+        `Total: <strong>${ptsNow} points</strong>` + (sess.newlyKnown.length ? ` · <strong>+${sess.newlyKnown.length} ⭐</strong>` : (sess.stepWords.length ? ` · <strong>${sess.stepWords.length} word${sess.stepWords.length === 1 ? '' : 's'} closer to a ⭐</strong>` : ''));
 
       const confettiEl = document.getElementById('res-confetti');
       if (sess.newlyKnown.length) confettiEl.textContent = '🎉 🏆 🎉';
