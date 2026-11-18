@@ -374,6 +374,14 @@
       align-items: center; justify-content: center;
     }
     .pause-overlay.visible { display: flex; }
+    .milestone-box { background:#fff; border-radius:28px; padding:36px 28px; max-width:420px; width:calc(100% - 32px); text-align:center; box-shadow:0 12px 48px rgba(0,0,0,.4); border:6px solid #fbbf24; }
+    .milestone-box .ms-trophy { font-size:4.5rem; line-height:1; }
+    .milestone-box h2 { font-size:2rem; font-weight:800; color:#221a4d; margin:10px 0 6px; }
+    .milestone-box p { color:#443a7a; font-size:1.1rem; margin:6px 0; }
+    .milestone-box .ms-big { font-size:2.4rem; font-weight:800; color:#b7791f; margin:10px 0; }
+    .milestone-box button { margin-top:14px; }
+    #dash-trophy button { margin-top:12px; }
+    @media print { body > *:not(#milestone-overlay) { display:none !important; } #milestone-overlay { position:static; background:#fff; } .milestone-box button { display:none; } }
     .pause-box {
       background: #fff; border-radius: 24px;
       padding: 40px 32px; max-width: 320px; width: 100%;
@@ -1254,6 +1262,18 @@
   </div>
 
   <!-- == PAUSE OVERLAY == -->
+  <div id="milestone-overlay" class="pause-overlay">
+    <div class="milestone-box">
+      <div class="ms-trophy">🏆</div>
+      <h2 id="ms-name">You did it!</h2>
+      <div class="ms-big">100 ⭐</div>
+      <p>Every one of the 100 words is a star.</p>
+      <p id="ms-detail"></p>
+      <button class="btn-confirm" onclick="closeMilestone()">Awesome!</button>
+      <button class="btn-secondary" onclick="window.print()">Print this page</button>
+    </div>
+  </div>
+
   <div id="pause-overlay" class="pause-overlay">
     <div class="pause-box">
       <div class="pause-icon">⏸</div>
@@ -1828,6 +1848,9 @@
 
       const targets = targetWords(student), knowns = knownPool(student);
       const stars = starCount(student);
+      { let t = document.getElementById('dash-trophy');
+        if (!t) { t = document.createElement('div'); t.id = 'dash-trophy'; const tr = document.querySelector('.star-track'); tr.parentNode.insertBefore(t, tr.nextSibling); }
+        t.innerHTML = student.milestoneAt ? '<button class="btn-secondary" onclick="showMilestone(currentStudent())">🏆 See 100-star milestone</button>' : ''; }
       const steps = stepsEarned(student);
       const ratio = Math.min(1, (stars + steps / DAYS_NEEDED) / WORDS_ALL.length);
       document.getElementById('dash-stars').innerHTML = `${stars} ⭐ <small>of ${WORDS_ALL.length}</small>`;
@@ -2837,6 +2860,14 @@
     // ========================================================
     // RESULTS
     // ========================================================
+    // Milestone: shown once when a student reaches a star for every word. Can be reopened from their dashboard.
+    function showMilestone(student) {
+      document.getElementById('ms-name').textContent = student.name + ', you did it!';
+      const d = student.milestoneAt ? new Date(student.milestoneAt).toLocaleDateString() : '';
+      document.getElementById('ms-detail').textContent = (d ? 'Reached on ' + d + '. ' : '') + (student.points || 0) + ' points so far.';
+      document.getElementById('milestone-overlay').classList.add('visible');
+    }
+    function closeMilestone() { document.getElementById('milestone-overlay').classList.remove('visible'); }
     function showResults() {
       stopTimer();
       clearIdleTimer();
@@ -2858,6 +2889,9 @@
 
       const ptsNow = student ? (student.points || 0) : 0;
       const stars = student ? starCount(student) : 0;
+      if (student && stars >= WORDS_ALL.length && !student.milestoneAt) {
+        student.milestoneAt = new Date().toISOString(); saveState(); showMilestone(student);
+      }
 
       (() => {
         const ratio = stars / WORDS_ALL.length;
