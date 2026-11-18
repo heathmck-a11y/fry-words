@@ -387,7 +387,7 @@
     .milestone-box .ms-big { font-size:2.4rem; font-weight:800; color:#b7791f; margin:10px 0; }
     .milestone-box button { margin-top:14px; }
     #dash-trophy button { margin-top:12px; }
-    @media print { body > *:not(#milestone-overlay) { display:none !important; } #milestone-overlay { position:static; background:#fff; } .milestone-box button { display:none; } }
+    @media print { body.printing-ms > *:not(#milestone-overlay) { display:none !important; } body.printing-ms #milestone-overlay { position:static; background:#fff; } body.printing-ms .milestone-box button { display:none; } }
     .pause-box {
       background: #fff; border-radius: 24px;
       padding: 40px 32px; max-width: 320px; width: 100%;
@@ -1220,7 +1220,7 @@
     <div class="letter-status-card">
       <div class="focus-row">
         <div class="grid-label">Word Status</div>
-        <span><button id="btn-assess" class="btn-choose" onclick="startAssess()" hidden>📋 Assess</button> <button class="btn-choose" onclick="showPicker()">🎯 Choose Words</button></span>
+        <span><button id="btn-assess" class="btn-choose" onclick="startAssess()" hidden>📋 Assess</button> <button id="btn-cards" class="btn-choose" onclick="openCardsDialog()" hidden>🖨️ Print cards</button> <button class="btn-choose" onclick="showPicker()">🎯 Choose Words</button></span>
       </div>
       <div id="focus-summary" class="focus-summary"></div>
       <div id="word-grid" class="word-grid"></div>
@@ -1319,6 +1319,21 @@
   </div>
 
   <!-- == PAUSE OVERLAY == -->
+  <div id="cards-overlay" class="pause-overlay">
+    <div class="pause-box" style="max-width:380px">
+      <div class="pause-icon">🖨️</div>
+      <h2 class="pause-title" style="margin-bottom:8px">Print mission cards</h2>
+      <p id="cards-sub" style="color:#6b6590;font-size:.85rem;font-weight:600;margin-bottom:14px"></p>
+      <div style="text-align:left;font-size:.9rem;font-weight:700;color:#221a4d;line-height:2.2">
+        <label>Copies of each word <select id="cards-copies" style="font:inherit;padding:2px 6px"><option>1</option><option selected>2</option><option>3</option></select></label><br>
+        <label>ZAP! cards <select id="cards-meteors" style="font:inherit;padding:2px 6px"><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select></label><br>
+        <label><input type="checkbox" id="cards-backs" checked> Include a card backs page</label>
+      </div>
+      <button class="btn-confirm" style="margin-top:16px" onclick="printMissionCards()">Print</button>
+      <button class="btn-quiet" onclick="document.getElementById('cards-overlay').classList.remove('visible')">Cancel</button>
+    </div>
+  </div>
+
   <div id="launch-overlay" class="pause-overlay launch-ov">
     <div id="launch-count" class="launch-count"></div>
     <div id="launch-rocket" class="launch-rocket">
@@ -1344,7 +1359,7 @@
       <p id="ms-line">Every word you were given is now a star.</p>
       <p id="ms-detail"></p>
       <button class="btn-confirm" onclick="closeMilestone()">Awesome!</button>
-      <button class="btn-secondary" onclick="window.print()">Print this page</button>
+      <button class="btn-secondary" onclick="printMilestone()">Print this page</button>
     </div>
   </div>
 
@@ -1700,6 +1715,7 @@
       const noMission = targetWords(s).length === 0;
       const show = assessEnabled && (inProgress || (noMission && !!assessNext(s)));
       b.hidden = !show;
+      const cb = document.getElementById('btn-cards'); if (cb) cb.hidden = !(assessEnabled && missionInfo(s).words.length > 0);
       if (show) b.textContent = inProgress ? '📋 Resume assessment' : ((s.focusWords || []).length ? '📋 Assess for next 7 words' : '📋 Assess to find words');
     }
     function startAssess() {
@@ -1739,6 +1755,87 @@
       saveState();
       toast(missed.length ? `${missed.length} mission word${missed.length === 1 ? '' : 's'} chosen` : 'All checked words were read correctly', 'green');
       showDashboard();
+    }
+
+
+    // ========================================================
+    // PRINTABLE MISSION CARDS: word cards in the student's color, plus ZAP! cards for the take-home game
+    // ========================================================
+    function openCardsDialog() {
+      const s = currentStudent(); if (!s) return;
+      const mi = missionInfo(s);
+      document.getElementById('cards-sub').textContent = `${mi.words.length} mission word${mi.words.length === 1 ? '' : 's'}: ${mi.words.join(', ')}`;
+      document.getElementById('cards-overlay').classList.add('visible');
+    }
+    function printMissionCards() {
+      const s = currentStudent(); if (!s) return;
+      const words = missionInfo(s).words; if (!words.length) return;
+      const copies = parseInt(document.getElementById('cards-copies').value, 10) || 2;
+      const meteors = parseInt(document.getElementById('cards-meteors').value, 10) || 3;
+      const backs = document.getElementById('cards-backs').checked;
+      const col = /^#[0-9a-fA-F]{6}$/.test(s.color || '') ? s.color : '#7c3aed';
+      const name = escHtml(s.name);
+      const rocket = (sz, c) => `<svg width="${sz}" height="${sz}" viewBox="0 0 40 40"><path d="M20 3 C28 10 29 20 27 30 L13 30 C11 20 12 10 20 3Z" fill="#fff" stroke="${c}" stroke-width="2"/><circle cx="20" cy="16" r="4" fill="${c}"/><path d="M13 24 L6 32 L13 31Z M27 24 L34 32 L27 31Z" fill="${c}"/><path d="M16 31 Q20 40 24 31Z" fill="#f59e0b"/></svg>`;
+      const star = c => `<svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 0 L7.5 4.5 L12 6 L7.5 7.5 L6 12 L4.5 7.5 L0 6 L4.5 4.5Z" fill="${c}"/></svg>`;
+      const fs = w => w.length <= 3 ? 50 : w.length <= 5 ? 40 : w.length <= 7 ? 29 : w.length <= 9 ? 24 : 20;
+      const wordCard = w => `<div class="cell"><div class="card" style="border-color:${col}">
+          <div class="top">${star(col)}<span style="color:${col}">${name}'s rocket</span>${star(col)}</div>
+          <div class="wd" style="font-size:${fs(w)}pt">${escHtml(w)}</div>
+          <div class="bot">${rocket(34, col)}</div></div></div>`;
+      const meteorCard = () => `<div class="cell"><div class="card" style="border-color:${col}">
+          <div class="top">${star('#f59e0b')}<span style="color:${col}">${name}'s rocket</span>${star('#f59e0b')}</div>
+          <div class="art"><svg width="120" height="120" viewBox="0 0 120 120">
+            <path d="M60 4 L70 34 L100 22 L82 48 L116 60 L82 72 L100 98 L70 86 L60 116 L50 86 L20 98 L38 72 L4 60 L38 48 L20 22 L50 34Z" fill="#fbbf24" stroke="#f59e0b" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M68 20 L42 64 L58 64 L50 100 L80 54 L63 54Z" fill="#ef4444" stroke="#b91c1c" stroke-width="2" stroke-linejoin="round"/></svg></div>
+          <div class="wd" style="font-size:22pt;color:${col};font-weight:900">ZAP!</div>
+          <div class="bot" style="font-size:8pt;color:#6b6590;font-weight:700">Put all your cards back</div></div></div>`;
+      const backCard = () => `<div class="cell"><div class="card back" style="border-color:${col};background:${col}">
+          <div class="bk">${rocket(60, col)}</div></div></div>`;
+      let deck = [];
+      words.forEach(w => { for (let i = 0; i < copies; i++) deck.push(wordCard(w)); });
+      for (let i = 0; i < meteors; i++) deck.push(meteorCard());
+      const pages = list => { let out = ''; for (let i = 0; i < list.length; i += 9) out += `<div class="grid">${list.slice(i, i + 9).join('')}</div>`; return out; };
+      const rules = `<div class="rules">
+          <h1 style="color:${col}">Rocket Words at home</h1>
+          <p class="lead">${name}'s rocket mission words: <strong>${words.map(escHtml).join(', ')}</strong></p>
+          <p>Play with a grown-up or a friend. 2 to 4 players. About 10 minutes.</p>
+          <ol>
+            <li>Shuffle the ZAP! cards into the word cards. Put the pile face down.</li>
+            <li>Take turns. Draw the top card.</li>
+            <li><strong>Word card:</strong> read the word. Read it right away, without sounding it out. Got it? Keep the card. Not sure? Someone tells you the word, and the card goes to the bottom of the pile.</li>
+            <li><strong>ZAP! card:</strong> put all your cards back in the pile and shuffle. The ZAP! card goes back too.</li>
+            <li>Keep playing until the timer goes off or the pile is gone.</li>
+            <li>The player with the most cards wins. Then shuffle and play again!</li>
+          </ol>
+          <p class="tip">Tip: use fewer ZAP! cards for a short game, more for a wilder one. Cut along the dashed lines.</p>
+        </div>`;
+      const container = document.getElementById('print-container');
+      container.innerHTML = `<style>
+          @page { size: letter; margin: 0.5in; }
+          #print-container { font-family: 'Teachers', system-ui, sans-serif; color: #221a4d; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          #print-container * { box-sizing: border-box; margin: 0; padding: 0; }
+          html, body { background: #fff !important; }
+          body::before { display: none !important; }
+          #print-container .rules { page-break-after: always; padding: 0.3in 0.2in; font-size: 14pt; line-height: 1.45; }
+          #print-container .rules h1 { font-size: 28pt; margin-bottom: 10pt; }
+          #print-container .rules p { margin-bottom: 10pt; } #print-container .rules .lead { font-size: 15pt; }
+          #print-container .rules ol { margin: 8pt 0 12pt 22pt; } #print-container .rules li { margin-bottom: 7pt; }
+          #print-container .rules .tip { font-size: 11pt; color: #6b6590; }
+          #print-container .grid { display: grid; grid-template-columns: repeat(3, 2.25in); grid-auto-rows: 3in; justify-content: center; page-break-after: always; }
+          #print-container .grid:last-child { page-break-after: auto; }
+          #print-container .cell { width: 2.25in; height: 3in; padding: 0.06in; border: 1px dashed #b8b2d0; }
+          #print-container .card { width: 100%; height: 100%; border: 4px solid; border-radius: 14px; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 7pt 4pt 5pt; text-align: center; }
+          #print-container .top { display: flex; align-items: center; gap: 5pt; font-size: 8pt; font-weight: 800; }
+          #print-container .wd { font-weight: 800; line-height: 1.1; }
+          #print-container .art { line-height: 0; }
+          #print-container .back { justify-content: center; }
+        </style>
+        <div class="rules">${rules.replace('<div class="rules">', '').replace(/<\/div>\s*$/, '')}</div>
+        ${pages(deck)}
+        ${backs ? pages(Array.from({ length: 9 }, backCard)) : ''}`;
+      document.getElementById('cards-overlay').classList.remove('visible');
+      window.print();
+      window.addEventListener('afterprint', () => { container.innerHTML = ''; }, { once: true });
     }
 
     function showPicker() {
@@ -3098,6 +3195,11 @@
       at(1900, () => { cnt.textContent = '1'; rocket.classList.add('shake'); });
       at(2700, () => { cnt.textContent = ''; rocket.classList.remove('shake'); rocket.classList.add('go'); });
       at(5300, done);
+    }
+    function printMilestone() {
+      document.body.classList.add('printing-ms');
+      window.addEventListener('afterprint', () => document.body.classList.remove('printing-ms'), { once: true });
+      window.print();
     }
     function closeMilestone() { document.getElementById('milestone-overlay').classList.remove('visible'); }
     function showResults() {
