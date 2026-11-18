@@ -1495,7 +1495,7 @@
     function setPromptScript(word) {
       const w = String(word).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
       document.getElementById('prompt-cta').innerHTML =
-        `Say: <br>"This is <em>${w}</em>."<br>"Say <em>${w}</em>."<br>"What are the sounds in <em>${w}</em>?"<br>"Spell <em>${w}</em>."<br>"What word?"`;
+        `Say: <br>"This is the word <em>${w}</em>."<br>"Read <em>${w}</em>."<br>"Spell <em>${w}</em>."<br>"What's the word?"`;
     }
     const IR_MAX_KNOWN        = 9;      // known words folded in around each new word
     // Stars: one per known word, out of all 100. Points: earned as they go.
