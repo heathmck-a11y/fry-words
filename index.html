@@ -826,6 +826,37 @@
     .star-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, #7c3aed, #fbbf24); transition: width .6s; }
     .star-rocket { position: absolute; top: -14px; font-size: 1.4rem; transform: translateX(-50%); transition: left .6s; }
     .star-moon { position: absolute; right: -6px; top: -12px; font-size: 1.2rem; }
+    [hidden] { display: none !important; }
+    .assess-btns { display: flex; gap: 14px; justify-content: center; margin: 8px 0 14px; }
+    .assess-btn { flex: 1; max-width: 220px; padding: 20px 10px; border: none; border-radius: 20px; font-family: 'Teachers', sans-serif; font-size: 1.4rem; font-weight: 800; color: #fff; cursor: pointer; }
+    .assess-btn small { display: block; font-size: .75rem; font-weight: 600; opacity: .9; margin-top: 4px; }
+    .assess-btn.ok { background: var(--green-dk); } .assess-btn.bad { background: var(--red-dk); }
+    .assess-btn:active { transform: scale(.96); }
+    .assess-toggle { display: flex; align-items: center; gap: 8px; margin: 14px 2px 0; font-size: .8rem; font-weight: 700; color: var(--soft); }
+    .assess-toggle input { width: 18px; height: 18px; accent-color: var(--accent); }
+    /* ── Rocket launch for each newly mastered word ── */
+    .launch-ov { background: linear-gradient(180deg, #070518 0%, #140f33 55%, #2d2363 100%); flex-direction: column; overflow: hidden; z-index: 250; }
+    .launch-ov::before { content: ''; position: absolute; inset: 0; background:
+        radial-gradient(1.5px 1.5px at 30px 40px, #fff 50%, transparent 60%), radial-gradient(1px 1px at 140px 110px, #fde68a 50%, transparent 60%),
+        radial-gradient(2px 2px at 250px 60px, #fff 50%, transparent 60%), radial-gradient(1px 1px at 90px 190px, #c4b5fd 50%, transparent 60%),
+        radial-gradient(1.5px 1.5px at 300px 230px, #fff 50%, transparent 60%); background-size: 340px 280px; opacity: .6; }
+    .launch-ground { position: absolute; left: 0; right: 0; bottom: 0; height: 90px; background: linear-gradient(180deg, #3b2f7a, #221a4d); border-top: 4px solid #4c3d8f; }
+    .launch-count { position: absolute; top: 12%; left: 0; right: 0; text-align: center; font-size: 5rem; font-weight: 800; color: #fbbf24; min-height: 6rem; z-index: 2; }
+    .launch-rocket { position: relative; width: 150px; margin-bottom: 70px; z-index: 2; }
+    .launch-rocket svg { display: block; width: 150px; height: auto; overflow: visible; }
+    .launch-word { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); background: #fff; color: #221a4d; border: 3px solid #6d28d9; border-radius: 12px; padding: 2px 8px; font-family: 'Teachers', sans-serif; font-weight: 800; line-height: 1.1; white-space: nowrap; }
+    .launch-rocket .flame { opacity: 0; }
+    .launch-rocket.shake { animation: lShake .12s linear infinite; }
+    .launch-rocket.shake .flame { opacity: .8; }
+    .launch-rocket.go { animation: lBlast 2.6s cubic-bezier(.5, 0, .9, .4) forwards; }
+    .launch-rocket.go .flame { opacity: 1; }
+    @keyframes lShake { 0%, 100% { transform: translateX(-2px); } 50% { transform: translateX(2px); } }
+    @keyframes lBlast { 0% { transform: translateY(0); } 100% { transform: translateY(-140vh); } }
+    .launch-msg { position: relative; z-index: 3; text-align: center; color: #f5f0ff; font-size: 1.5rem; font-weight: 800; padding: 0 20px; min-height: 5rem; }
+    .launch-msg small { display: block; font-size: .95rem; color: #c4b5fd; font-weight: 700; margin-top: 4px; }
+    .launch-actions { position: absolute; bottom: 24px; left: 0; right: 0; text-align: center; z-index: 4; }
+    .launch-actions .btn-confirm { margin-right: 10px; }
+    .launch-actions .btn-quiet { color: #a89ccf; }
     .points-row { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; font-size: .85rem; font-weight: 800; color: var(--soft); }
     .points-row b { color: #f0abfc; font-size: 1.1rem; }
     .sess-points {
@@ -840,6 +871,8 @@
       animation: ptsFloat .8s ease-out forwards;
     }
     @keyframes ptsFloat { 0% { opacity: 1; transform: translate(-50%, 0) } 100% { opacity: 0; transform: translate(-50%, -70px) } }
+    .launch-label { align-self: center; margin: 0 0 6px; padding: 4px 14px; border-radius: 100px; background: #2d2363; border: 2px solid #4c3d8f; color: #e4ddff; font-size: .78rem; font-weight: 800; letter-spacing: .04em; }
+    .mission-label { font-size: .85rem; font-weight: 800; color: #e4ddff; margin-top: 14px; }
     .stars-sub { font-size: .8rem; font-weight: 700; color: var(--soft); margin-top: 4px; }
     .res-list { margin: 12px 0; text-align: left; }
     .res-list-row { font-size: .9rem; font-weight: 700; color: #e4ddff; margin: 6px 0; }
@@ -1116,6 +1149,7 @@
         <button class="btn-add" onclick="addStudent()">+ Add</button>
       </div>
       <ul id="student-list" class="student-list"></ul>
+      <label class="assess-toggle"><input type="checkbox" id="assess-enabled" onchange="setAssessEnabled(this.checked)"> Teacher option: use an assessment to choose each student's next 7 words</label>
     </section>
 
     <div class="qr-section">
@@ -1162,7 +1196,7 @@
           <path id="dash-pie" fill="url(#pieGrad)" d="M45,45 L45,1"/>
         </svg>
         <div style="flex:1">
-          <div id="dash-stars" class="stars-big">0 ⭐ <small>of 100</small></div>
+          <div id="dash-stars" class="stars-big">0 ⭐ <small>of 0</small></div>
           <div id="dash-progress" class="stars-sub"></div>
         </div>
       </div>
@@ -1171,7 +1205,7 @@
         <span id="star-rocket" class="star-rocket" style="left:0%">🚀</span>
         <span class="star-moon">🌙</span>
       </div>
-      <div class="points-row"><span>Points</span><b id="dash-points">0</b></div>
+      <div class="points-row" hidden><span>Points</span><b id="dash-points">0</b></div>
     </div>
 
     <div class="streak-section">
@@ -1186,7 +1220,7 @@
     <div class="letter-status-card">
       <div class="focus-row">
         <div class="grid-label">Word Status</div>
-        <button class="btn-choose" onclick="showPicker()">🎯 Choose Words</button>
+        <span><button id="btn-assess" class="btn-choose" onclick="startAssess()" hidden>📋 Assess</button> <button class="btn-choose" onclick="showPicker()">🎯 Choose Words</button></span>
       </div>
       <div id="focus-summary" class="focus-summary"></div>
       <div id="word-grid" class="word-grid"></div>
@@ -1213,10 +1247,25 @@
 
 
   <!-- == SCREEN: SESSION == -->
+  <div id="screen-assess" class="screen">
+    <div class="session-topbar">
+      <button class="btn-back" onclick="exitAssess()">← Save &amp; exit</button>
+      <button id="assess-undo" class="btn-pause" onclick="undoAssess()">Undo</button>
+    </div>
+    <h2 id="assess-title" class="settings-title" style="text-align:center;color:var(--text)">Assessment</h2>
+    <p id="assess-sub" class="settings-desc" style="text-align:center"></p>
+    <div class="card-stage"><div class="flashcard"><span id="assess-word" class="card-word-text"></span></div></div>
+    <div class="assess-btns">
+      <button class="assess-btn ok" onclick="answerAssess(true)">✓ Yes<small>automatic</small></button>
+      <button class="assess-btn bad" onclick="answerAssess(false)">✗ No<small>incorrect or not automatic</small></button>
+    </div>
+    <p class="adult-prompt">Show the word and ask: "What word?" Tap Yes only if the student reads it automatically, right away and without sounding it out. Tap No if the read is wrong, slow, or sounded out. The assessment stops when 7 words get a No, and those 7 become the next mission.</p>
+  </div>
+
   <div id="screen-session" class="screen">
     <div class="session-topbar">
       <button class="btn-back" onclick="endSession()">← End Session Early</button>
-      <span id="sess-points" class="sess-points">0 pts</span>
+      <span id="sess-points" class="sess-points" hidden>0 pts</span>
       <button id="btn-pause" class="btn-pause" onclick="pauseSession()">Pause</button>
     </div>
 
@@ -1230,6 +1279,8 @@
       </div>
       <div class="timer-label">remaining</div>
     </div>
+
+    <div id="launch-label" class="launch-label" hidden>🚀 Launch check: words from earlier days</div>
 
     <div class="card-stage">
       <div id="flashcard" class="flashcard">
@@ -1268,12 +1319,29 @@
   </div>
 
   <!-- == PAUSE OVERLAY == -->
+  <div id="launch-overlay" class="pause-overlay launch-ov">
+    <div id="launch-count" class="launch-count"></div>
+    <div id="launch-rocket" class="launch-rocket">
+      <svg viewBox="0 0 150 260" aria-hidden="true">
+        <g class="flame"><path d="M55 205 Q75 290 95 205 Z" fill="#f97316"/><path d="M63 205 Q75 262 87 205 Z" fill="#fde047"/></g>
+        <path d="M75 4 C112 40 118 100 112 205 L38 205 C32 100 38 40 75 4 Z" fill="#f5f0ff" stroke="#4c3d8f" stroke-width="3"/>
+        <path d="M38 150 L8 210 L40 200 Z M112 150 L142 210 L110 200 Z" fill="#ef4444" stroke="#4c3d8f" stroke-width="3"/>
+        <path d="M75 4 C95 24 104 40 107 62 L43 62 C46 40 55 24 75 4 Z" fill="#ef4444"/>
+        <rect x="52" y="205" width="46" height="14" rx="4" fill="#6b5bb0"/>
+      </svg>
+      <div id="launch-word" class="launch-word"></div>
+    </div>
+    <div id="launch-msg" class="launch-msg"></div>
+    <div class="launch-ground"></div>
+    <div class="launch-actions"><button id="launch-next" class="btn-confirm" hidden onclick="launchAdvance()">Continue</button><button id="launch-skip" class="btn-quiet" onclick="launchAdvance()">Skip</button></div>
+  </div>
+
   <div id="milestone-overlay" class="pause-overlay">
     <div class="milestone-box">
       <div class="ms-trophy">🏆</div>
       <h2 id="ms-name">You did it!</h2>
-      <div class="ms-big">100 ⭐</div>
-      <p>Every one of the 100 words is a star.</p>
+      <div class="ms-big" id="ms-stars">⭐</div>
+      <p id="ms-line">Every word you were given is now a star.</p>
       <p id="ms-detail"></p>
       <button class="btn-confirm" onclick="closeMilestone()">Awesome!</button>
       <button class="btn-secondary" onclick="window.print()">Print this page</button>
@@ -1439,7 +1507,7 @@
 
       <div class="points-celebration">
         <div id="res-confetti" class="confetti-row">⭐ ⭐ ⭐</div>
-        <div class="pts-earned-label">Points earned today</div>
+        <div class="pts-earned-label">Mission points today</div>
         <div id="res-pts-earned" class="pts-earned-number">0</div>
         <div class="pts-earned-unit">points</div>
         <div id="res-pts-total" class="pts-total-row"></div>
@@ -1459,7 +1527,7 @@
         </svg>
         <div class="res-pie-label">
           <span id="res-pie-pct" class="res-pie-pct">0%</span>
-          <span class="res-pie-sub">of 100 words known</span>
+          <span class="res-pie-sub">of your assigned words</span>
         </div>
       </div>
 
@@ -1480,18 +1548,38 @@
     // ========================================================
     const STORE = 'fryWords_v1';
 
-    // First 100 Fry instant words, standard frequency order
+    // Kearns high-frequency word list, words 1-300 (Texas Education Agency, 2021), same list as High-Frequency Word Check and Word Trail
     const DEFAULT_WORD_ORDER = [
-      'the','of','and','a','to','in','is','you','that','it',
-      'he','was','for','on','are','as','with','his','they','I',
-      'at','be','this','have','from','or','one','had','by','word',
-      'but','not','what','all','were','we','when','your','can','said',
-      'there','use','an','each','which','she','do','how','their','if',
-      'will','up','other','about','out','many','then','them','these','so',
-      'some','her','would','make','like','him','into','time','has','look',
-      'two','more','write','go','see','number','no','way','could','people',
-      'my','than','first','water','been','call','who','oil','its','now',
-      'find','long','down','day','did','get','come','made','may','part'
+      'the','to','and','of','a','in','is','I','you','it',
+      'for','that','on','was','with','are','this','be','not','as',
+      'at','he','have','from','or','they','all','but','by','your',
+      'one','can','we','his','if','will','what','about','my','do',
+      'there','an','up','had','out','when','so','no','would','more',
+      'she','were','her','like','me','some','their','other','time','has',
+      'get','them','then','people','how','see','who','just','new','into',
+      'now','been','which','only','could','know','any','these','over','than',
+      'back','him','first','very','us','go','our','good','may','make',
+      'here','two','many','also','way','did','where','use','down','home',
+      'well','after','day','think','help','find','most','work','its','made',
+      'too','little','want','right','because','much','even','each','should','through',
+      'before','long','take','look','must','off','am','around','why','come',
+      'old','last','still','need','same','man','such','got','big','next',
+      'something','another','name','water','say','world','never','great','again','those',
+      'place','read','put','school','house','part','under','while','found','own',
+      'every','away','small','year','tell','life','three','best','really','set',
+      'high','might','went','both','thought','came','without','few','better','always',
+      'let','book','give','end','between','left','show','thing','sure','top',
+      'hard','keep','money','free','once','white','live','room','information','yes',
+      'page','since','group','please','number','city','men','children','head','black',
+      'until','night','large','call','play','enough','run','today','ever','line',
+      'food','hand','open','try','air','family','car','real','side','far',
+      'against','lot','course','person','took','change','anything','light','state','saw',
+      'red','told','feel','however','important','system','someone','mother','during','full',
+      'along','game','job','together','nothing','seen','list','kind','body','care',
+      'though','special','box','order','soon','word','buy','sun','done','second',
+      'yet','country','often','start','young','story','oh','business','above','heard',
+      'able','almost','land','sound','face','four','front','point','mean','ask',
+      'else','stop','learn','street','ago','write','problem','bad','everything','maybe'
     ];
     // Fixed canonical order — used as the stable key-set for scores/history/grids
     const WORDS_ALL = [...DEFAULT_WORD_ORDER];
@@ -1526,7 +1614,7 @@
         `Say: <br>"This is the word <em>${w}</em>."<br>"Read <em>${w}</em>."<br>"Spell <em>${w}</em>."<br>"What's the word?"`;
     }
     const IR_MAX_KNOWN        = 9;      // known words folded in around each new word
-    // Stars: one per known word, out of all 100. Points: earned as they go.
+    // Stars: one per assigned word mastered, out of the words assigned so far.
     const PTS_CORRECT         = 1;      // any word read correctly
     const PTS_NEW_CORRECT     = 2;      // a new word read correctly within the set time (3 or 4 seconds) (instead of 1)
     const PTS_DAY_PASSED      = 5;      // a new word passes a practice day
@@ -1549,7 +1637,7 @@
       document.getElementById(id).classList.add('active');
       window.scrollTo(0, 0);
     }
-    function showHome()      { renderStudentList(); showScreen('screen-home'); }
+    function showHome()      { renderStudentList(); const c = document.getElementById('assess-enabled'); if (c) c.checked = assessEnabled; showScreen('screen-home'); }
     function showDashboard() { const s = currentStudent(); if (!s) return showHome(); renderDashboard(s); showScreen('screen-dashboard'); }
 
     // ========================================================
@@ -1587,6 +1675,70 @@
       const other = _pickMode === 'learn' ? _pickKnown : _pickSel;
       if (mine.has(w)) mine.delete(w);
       else { mine.add(w); other.delete(w); }
+    }
+
+
+    // ========================================================
+    // ASSESSMENT (optional, teacher): read through the words in order. The first 7 missed words become the mission.
+    // Words read automatically (Yes) are marked known up front (no stars). Anything else (wrong, slow, sounded out) is a No and counts as a miss.
+    // ========================================================
+    const ASSESS_MISSES = 7;
+    let assessEnabled = (() => { try { return localStorage.getItem('wordRocket.assess') === '1'; } catch (e) { return false; } })();
+    function setAssessEnabled(on) {
+      assessEnabled = !!on;
+      try { localStorage.setItem('wordRocket.assess', on ? '1' : '0'); } catch (e) { /* remembered for this visit only */ }
+    }
+    function assessNext(s) {
+      const a = s.assess || { pos: 0, log: [] };
+      for (let i = a.pos; i < WORDS_ALL.length; i++) { if (s.scores[WORDS_ALL[i]] !== 'known') return { w: WORDS_ALL[i], i }; }
+      return null;
+    }
+    // The Assess button shows when the student has no mission words left to master (or an assessment is half done).
+    function updateAssessButton(s) {
+      const b = document.getElementById('btn-assess'); if (!b) return;
+      const inProgress = !!(s.assess && s.assess.log.length);
+      const noMission = targetWords(s).length === 0;
+      const show = assessEnabled && (inProgress || (noMission && !!assessNext(s)));
+      b.hidden = !show;
+      if (show) b.textContent = inProgress ? '📋 Resume assessment' : ((s.focusWords || []).length ? '📋 Assess for next 7 words' : '📋 Assess to find words');
+    }
+    function startAssess() {
+      const s = currentStudent(); if (!s) return;
+      if (!s.assess) s.assess = { pos: 0, log: [] };
+      if (!assessNext(s)) { toast('All words have been checked', 'green'); return; }
+      showScreen('screen-assess'); renderAssess();
+    }
+    function renderAssess() {
+      const s = currentStudent(), a = s.assess, n = assessNext(s);
+      const missed = a.log.filter(x => !x.ok).length;
+      if (!n || missed >= ASSESS_MISSES) return finishAssess();
+      document.getElementById('assess-title').textContent = 'Assessment: ' + s.name;
+      document.getElementById('assess-sub').textContent = `Missed ${missed} of ${ASSESS_MISSES} · word ${n.i + 1} of ${WORDS_ALL.length}`;
+      document.getElementById('assess-word').textContent = n.w;
+      document.getElementById('assess-undo').disabled = !a.log.length;
+    }
+    function answerAssess(ok) {
+      const s = currentStudent(), n = assessNext(s); if (!n) return;
+      s.assess.log.push({ w: n.w, ok, i: n.i }); s.assess.pos = n.i + 1;
+      saveState(); renderAssess();
+    }
+    function undoAssess() {
+      const s = currentStudent(), a = s.assess; if (!a || !a.log.length) return;
+      const last = a.log.pop(); a.pos = last.i; saveState(); renderAssess();
+    }
+    function exitAssess() { saveState(); showDashboard(); }
+    function finishAssess() {
+      const s = currentStudent(), a = s.assess;
+      const missed = a.log.filter(x => !x.ok).map(x => x.w), right = a.log.filter(x => x.ok).map(x => x.w);
+      if (!s.preKnown) s.preKnown = []; if (!s.knownWords) s.knownWords = [];
+      // Words mastered in the last mission stay in the rehearsal pool
+      (s.focusWords || []).forEach(w => { if (s.scores[w] === 'known' && !s.knownWords.includes(w)) s.knownWords.push(w); });
+      right.forEach(w => { s.scores[w] = 'known'; if (!s.preKnown.includes(w)) s.preKnown.push(w); if (!s.knownWords.includes(w)) s.knownWords.push(w); });
+      s.focusWords = missed;
+      s.assess = { pos: a.pos, log: [] };
+      saveState();
+      toast(missed.length ? `${missed.length} mission word${missed.length === 1 ? '' : 's'} chosen` : 'All checked words were read correctly', 'green');
+      showDashboard();
     }
 
     function showPicker() {
@@ -1776,7 +1928,20 @@
     // Each new word earns its star in 3 steps, one per practice day passed
     function stepGlyphs(n) { n = Math.max(0, Math.min(DAYS_NEEDED, n)); return '★'.repeat(n) + '☆'.repeat(DAYS_NEEDED - n); }
     function stepsEarned(s) { return targetWords(s).reduce((a, w) => a + Math.min(passedDays(s, w), DAYS_NEEDED - 1), 0); }
-    function starCount(s) { return WORDS_ALL.filter(w => s.scores[w] === 'known').length; }
+    // Stars are earned by mastering the words the grown-up assigned. Words marked known up front do not earn stars.
+    function starCount(s) { const pre = s.preKnown || []; return WORDS_ALL.filter(w => s.scores[w] === 'known' && !pre.includes(w)).length; }
+    // Goal = stars earned so far + assigned words still being learned. Assigning more words raises it.
+    // Mission = the words currently assigned. Each word has 3 fuel cells, one per practice day passed.
+    function missionInfo(s) {
+      const pre = s.preKnown || [];
+      const words = (s.focusWords || []).filter(w => WORDS_ALL.includes(w) && !pre.includes(w));
+      // Each word is worth 20 points: 5 for the first practice day passed, 5 for the second, 10 for the third (mastery).
+      const WORD_PTS = [0, 5, 10, 20];
+      let pts = 0, done = 0;
+      words.forEach(w => { if (s.scores[w] === 'known') { pts += WORD_PTS[3]; done++; } else pts += WORD_PTS[Math.min(passedDays(s, w), 2)]; });
+      return { n: (s.milestoneCount || 0) + 1, words, done, pts, total: words.length * WORD_PTS[3] };
+    }
+    function starGoal(s) { return starCount(s) + targetWords(s).length; }
     function knownPool(s) {
       const set = new Set([...(s.knownWords||[]), ...(s.focusWords||[])]);
       return WORD_ORDER.filter(w => set.has(w) && s.scores[w] === 'known');
@@ -1810,7 +1975,7 @@
         li.innerHTML = `
           <div class="student-left" onclick="selectStudent('${student.id}')">
             <span class="student-name"><span class="student-icon">${student.icon||'⭐'}</span>${escHtml(student.name)}</span>
-            <span class="progress-badge">${(() => { const k = knownPool(student).length, t = targetWords(student).length; return (k + t) ? `${starCount(student)} ⭐ · ${student.points || 0} pts` : 'No words chosen yet'; })()}</span>
+            <span class="progress-badge">${(() => { const k = knownPool(student).length, t = targetWords(student).length; const mi = missionInfo(student); return (k + t) ? `${starCount(student)} ⭐` + (mi.words.length ? ` · Mission ${mi.n}: ${mi.pts}/${mi.total} pts` : '') : 'No words chosen yet'; })()}</span>
           </div>
           <button class="btn-customize-inline" onclick="event.stopPropagation();state.currentStudentId='${student.id}';showCustomize()">✏</button>
           <span class="student-arrow" onclick="selectStudent('${student.id}')">›</span>
@@ -1845,6 +2010,7 @@
       document.getElementById('dash-name').textContent = student.name;
       document.getElementById('points-goal-label').textContent = 'STARS';
       applyStudentTheme(student);
+      updateAssessButton(student);
       renderStreakSection(student);
       renderNotes(student);
       const focus = new Set(student.focusWords || []);
@@ -1857,10 +2023,15 @@
       const stars = starCount(student);
       { let t = document.getElementById('dash-trophy');
         if (!t) { t = document.createElement('div'); t.id = 'dash-trophy'; const tr = document.querySelector('.star-track'); tr.parentNode.insertBefore(t, tr.nextSibling); }
-        t.innerHTML = student.milestoneAt ? '<button class="btn-secondary" onclick="showMilestone(currentStudent())">🏆 See 100-star milestone</button>' : ''; }
+        t.innerHTML = student.milestoneAt ? '<button class="btn-secondary" onclick="showMilestone(currentStudent())">🏆 See last milestone</button>' : ''; }
       const steps = stepsEarned(student);
-      const ratio = Math.min(1, (stars + steps / DAYS_NEEDED) / WORDS_ALL.length);
-      document.getElementById('dash-stars').innerHTML = `${stars} ⭐ <small>of ${WORDS_ALL.length}</small>`;
+      const goal = starGoal(student);
+      const mi = missionInfo(student);
+      const ratio = mi.total ? Math.min(1, mi.pts / mi.total) : 0;
+      { let m = document.getElementById('mission-label');
+        if (!m) { m = document.createElement('div'); m.id = 'mission-label'; m.className = 'mission-label'; const tr = document.querySelector('.star-track'); tr.parentNode.insertBefore(m, tr.nextSibling); }
+        m.textContent = mi.words.length ? `🚀 Mission ${mi.n}: ${mi.pts} of ${mi.total} points · ${mi.done} of ${mi.words.length} words mastered` + (mi.done === mi.words.length ? ' · mission complete!' : '') : ''; }
+      document.getElementById('dash-stars').innerHTML = `${stars} ⭐ <small>${goal ? 'of ' + goal : ''}</small>`;
       document.getElementById('dash-progress').textContent =
         targets.length ? `Working on ${targets.length} new word${targets.length === 1 ? '' : 's'}` : (knowns.length ? 'Ready for new words' : 'No words chosen yet');
       document.getElementById('star-fill').style.width = (ratio * 100) + '%';
@@ -2011,13 +2182,23 @@
     // The known words in every round are drawn at random so the child
     // cannot learn the order. Once T has been folded in it joins the
     // knowns for the next new word.
-    function buildQueue(student) {
+    // Launch check: at the start of a session, one cold read of each word that passed on an earlier day and is not mastered yet.
+    function launchWords(student) {
+      const t = today();
+      return targetWords(student).filter(w => {
+        if (student.scores[w] !== 'learning') return false;
+        const h = (student.history || {})[w] || [];
+        return passedDays(student, w) >= 1 && !h.some(e => e.date === t);
+      });
+    }
+    function buildQueue(student, withLaunch) {
       const targets  = targetWords(student);
       const learning = targets.filter(w => student.scores[w] === 'learning');
       const unseen   = targets.filter(w => student.scores[w] !== 'learning');
       const ordered  = [...learning, ...unseen];
       let knowns     = knownPool(student);
       const q = [];
+      if (withLaunch) shuffle(launchWords(student)).forEach(w => q.push({ w, target: false, launch: true, block: 0 }));
 
       if (!ordered.length) {
         shuffle(knowns).forEach(w => q.push({ w, target: false, block: 0 }));
@@ -2046,8 +2227,9 @@
         showPicker();
         return;
       }
-      const queue = buildQueue(student);
+      const queue = buildQueue(student, true);
       state.session = {
+        launchTotal:     queue.filter(x => x.launch).length, launchDone: 0, launchOk: 0, missionStart: missionInfo(student).pts,
         queue,
         dayPass:         {},
         slowWords:       new Set(),
@@ -2287,7 +2469,7 @@
       if (!students.length) { panel.innerHTML = '<div class="class-empty">No students yet.</div>'; return; }
 
       const rows = students.map(s => {
-        const pts  = starCount(s) + ' ⭐ · ' + (s.points||0) + ' pts';
+        const mi = missionInfo(s); const pts  = starCount(s) + ' ⭐' + (mi.words.length ? ' · Mission ' + mi.n + ': ' + mi.pts + '/' + mi.total + ' pts' : '');
         const { known, learning } = countScores(s);
         const knownPct    = Math.round(known/WORDS_ALL.length*100);
         const learningPct = Math.round(learning/WORDS_ALL.length*100);
@@ -2598,8 +2780,8 @@
             <div class="meta">${student.name} &nbsp;·&nbsp; ${today_str}</div>
           </div>
           <div style="text-align:right">
-            <div style="font-size:28px;font-weight:900;color:#6d28d9">${pct} ⭐ of 100</div>
-            <div style="font-size:10px;color:#94a3b8;font-weight:700">${pts} points</div>
+            <div style="font-size:28px;font-weight:900;color:#6d28d9">${pct} ⭐ of ${starGoal(student)}</div>
+            <div style="font-size:10px;color:#94a3b8;font-weight:700">${(() => { const mi = missionInfo(student); return mi.words.length ? `Mission ${mi.n}: ${mi.pts} of ${mi.total} points, ${mi.done} of ${mi.words.length} words mastered` : ""; })()}</div>
           </div>
         </div>
 
@@ -2736,6 +2918,7 @@
       card.classList.add('flip');
 
       document.getElementById('card-word-text').textContent = word;
+      document.getElementById('launch-label').hidden = !sess.queue[sess.cardIndex].launch;
 
       sess.cardShownAt = Date.now();
       startIdleTimer();
@@ -2852,6 +3035,12 @@
         sess.cardIndex = item.target ? item.block : sess.cardIndex + 1;
       }
 
+      if (item.launch) {
+        sess.launchDone = (sess.launchDone || 0) + 1;
+        if (outcome === 'correct' && responseTime <= fluentMs()) sess.launchOk = (sess.launchOk || 0) + 1;
+        if (sess.launchDone === sess.launchTotal) toast(`Launch check: ${sess.launchOk} of ${sess.launchTotal} word${sess.launchTotal === 1 ? '' : 's'} ready`, 'green');
+      }
+
       saveState();
       renderCard();
     }
@@ -2867,12 +3056,48 @@
     // ========================================================
     // RESULTS
     // ========================================================
-    // Milestone: shown once when a student reaches a star for every word. Can be reopened from their dashboard.
+    // Milestone: shown when a student has mastered every word assigned so far. Can be reopened from their dashboard.
     function showMilestone(student) {
-      document.getElementById('ms-name').textContent = student.name + ', you did it!';
+      document.getElementById('ms-name').textContent = student.name + ', mission complete!';
+      document.getElementById('ms-line').textContent = `Mission ${student.milestoneCount || 1} is done. Every word you were given is now a star.`;
+      const n = student.milestoneStars || starCount(student);
+      document.getElementById('ms-stars').textContent = n + ' ⭐';
       const d = student.milestoneAt ? new Date(student.milestoneAt).toLocaleDateString() : '';
-      document.getElementById('ms-detail').textContent = (d ? 'Reached on ' + d + '. ' : '') + (student.points || 0) + ' points so far.';
+      document.getElementById('ms-detail').textContent = (d ? 'Reached on ' + d + '.' : '');
       document.getElementById('milestone-overlay').classList.add('visible');
+    }
+    // Each word mastered today gets its own rocket launch before the results.
+    let _launchQ = [], _launchAfter = null, _launchTimers = [], _launchTotal = 0;
+    function startLaunches(words, after) { _launchQ = [...words]; _launchTotal = words.length; _launchAfter = after; nextLaunch(); }
+    function clearLaunchTimers() { _launchTimers.forEach(clearTimeout); _launchTimers = []; }
+    function launchAdvance() { clearLaunchTimers(); nextLaunch(); }
+    function nextLaunch() {
+      clearLaunchTimers();
+      const ov = document.getElementById('launch-overlay');
+      if (!_launchQ.length) { ov.classList.remove('visible'); const a = _launchAfter; _launchAfter = null; if (a) a(); return; }
+      const w = _launchQ.shift();
+      const rocket = document.getElementById('launch-rocket'), cnt = document.getElementById('launch-count');
+      const wordEl = document.getElementById('launch-word');
+      wordEl.textContent = w; wordEl.style.fontSize = Math.max(14, Math.min(30, Math.floor(120 / Math.max(3, w.length) * 1.5))) + 'px';
+      rocket.className = 'launch-rocket'; rocket.style.display = ''; cnt.textContent = '';
+      document.getElementById('launch-msg').innerHTML = '';
+      document.getElementById('launch-next').hidden = true;
+      document.getElementById('launch-next').textContent = _launchQ.length ? 'Next rocket' : 'Continue';
+      document.getElementById('launch-skip').hidden = false;
+      ov.classList.add('visible');
+      const still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const done = () => {
+        rocket.style.display = 'none'; cnt.textContent = '🚀';
+        document.getElementById('launch-msg').innerHTML = `<strong>“${escHtml(w)}”</strong> is mastered! ⭐<small>${_launchTotal > 1 ? 'Rocket ' + (_launchTotal - _launchQ.length) + ' of ' + _launchTotal : 'Blast off!'}</small>`;
+        document.getElementById('launch-next').hidden = false; document.getElementById('launch-skip').hidden = true;
+      };
+      if (still) { done(); return; }
+      const at = (ms, fn) => _launchTimers.push(setTimeout(fn, ms));
+      at(300,  () => cnt.textContent = '3');
+      at(1100, () => cnt.textContent = '2');
+      at(1900, () => { cnt.textContent = '1'; rocket.classList.add('shake'); });
+      at(2700, () => { cnt.textContent = ''; rocket.classList.remove('shake'); rocket.classList.add('go'); });
+      at(5300, done);
     }
     function closeMilestone() { document.getElementById('milestone-overlay').classList.remove('visible'); }
     function showResults() {
@@ -2896,12 +3121,15 @@
 
       const ptsNow = student ? (student.points || 0) : 0;
       const stars = student ? starCount(student) : 0;
-      if (student && stars >= WORDS_ALL.length && !student.milestoneAt) {
-        student.milestoneAt = new Date().toISOString(); saveState(); showMilestone(student);
+      // Milestone: every assigned word is mastered and this session finished at least one of them.
+      let _msPending = false;
+      if (student && stars > 0 && !targetWords(student).length && sess.newlyKnown.length && stars > (student.milestoneStars || 0)) {
+        student.milestoneAt = new Date().toISOString(); student.milestoneStars = stars; student.milestoneCount = (student.milestoneCount || 0) + 1; saveState(); _msPending = true;
       }
 
       (() => {
-        const ratio = stars / WORDS_ALL.length;
+        const goal = starGoal(student);
+        const ratio = goal ? Math.min(1, stars / goal) : 0;
         const cx=45, cy=45, r=44;
         const angle = ratio * 2 * Math.PI;
         const x = cx + r * Math.sin(angle), y = cy - r * Math.cos(angle);
@@ -2922,10 +3150,16 @@
       })();
 
       const ptsEl = document.getElementById('res-pts-earned');
-      ptsEl.textContent = ptsEarned;
-      ptsEl.classList.toggle('has-points', ptsEarned > 0);
+      const miNow = missionInfo(student);
+      const missionGain = Math.max(0, miNow.pts - (sess.missionStart || 0));
+      ptsEl.textContent = missionGain;
+      ptsEl.classList.toggle('has-points', missionGain > 0);
       document.getElementById('res-pts-total').innerHTML =
-        `Total: <strong>${ptsNow} points</strong>` + (sess.newlyKnown.length ? ` · <strong>+${sess.newlyKnown.length} ⭐</strong>` : (sess.stepWords.length ? ` · <strong>${sess.stepWords.length} word${sess.stepWords.length === 1 ? '' : 's'} closer to a ⭐</strong>` : ''));
+        (miNow.words.length ? `Mission ${miNow.n}: <strong>${miNow.pts} of ${miNow.total} points</strong> · ` : '') +
+        (sess.newlyKnown.length ? `<strong>+${sess.newlyKnown.length} ⭐ today</strong>` : (sess.stepWords.length ? `<strong>${sess.stepWords.length} word${sess.stepWords.length === 1 ? '' : 's'} closer to a ⭐</strong>` : 'Nice practice!'));
+
+      if (sess.newlyKnown.length) startLaunches(sess.newlyKnown, () => { if (_msPending) showMilestone(student); });
+      else if (_msPending) showMilestone(student);
 
       const confettiEl = document.getElementById('res-confetti');
       if (sess.newlyKnown.length) confettiEl.textContent = '🎉 🏆 🎉';
@@ -2955,6 +3189,7 @@
 
       const pills = ws => ws.map(w => `<span class="word-pill learning">${escHtml(w)}</span>`).join(' ');
       let bd = '';
+      if (sess.launchTotal) bd += `<div class="res-list-row">🚀 Launch check: ${sess.launchOk || 0} of ${sess.launchTotal} ready</div>`;
       if (sess.newlyKnown.length) bd += `<div class="res-list-row">🎉 Now known: ${pills(sess.newlyKnown)}</div>`;
       if (sess.stepWords.length) bd += `<div class="res-list-row">⭐ Closer to a star: ${sess.stepWords.map(w => `<span class="word-pill learning">${escHtml(w)} ${stepGlyphs(passedDays(student, w))}</span>`).join(' ')}</div>`;
       const missed = [...new Set([...sess.wrongWords, ...sess.providedWords])];
@@ -3102,7 +3337,7 @@
 
     function showInfo() {
       document.getElementById('info-points-text').innerHTML =
-        `Every known word is a <strong style="color:#fff;">star</strong>, so the goal is 100 stars: one for each of the 100 words. A new word earns its star in 3 steps, one each practice day it is read right within the set time (3 or 4 seconds) every time (★☆☆, ★★☆, then the star). Points come as they practice: 1 for any word read right, 2 for a new word read right within the set time (3 or 4 seconds), 5 when a new word passes a practice day, and 20 when a word becomes known.`;
+        `Each assigned word the student masters is a <strong style="color:#fff;">star</strong>. Each assigned word is also worth 20 mission points: 5 for the first practice day passed, 5 for the second, and 10 when it becomes a star. The goal grows as new words are added, and finishing every assigned word is a milestone. Words marked known up front do not earn stars. A new word earns its star in 3 steps, one each practice day it is read right within the set time (3 or 4 seconds) every time (★☆☆, ★★☆, then the star).`;
       document.getElementById('info-modal').style.display = 'flex';
     }
     function hideInfo() {
@@ -3117,7 +3352,7 @@
       <h2 style="font-family:'Teachers',sans-serif;font-size:1.3rem;font-weight:800;color:#fff;margin:0 0 16px;">How Word Rocket Works</h2>
 
       <p style="font-family:'Teachers',sans-serif;font-size:.9rem;color:#d6ccf5;line-height:1.6;margin:0 0 14px;">
-        <strong style="color:#fff;">Word Rocket</strong> is a sight word practice app built on the first 100 Fry instant words. It uses spaced practice across days to build automatic, on-sight recognition.
+        <strong style="color:#fff;">Word Rocket</strong> is a sight word practice app built on the Kearns high-frequency word list (300 words). It uses spaced practice across days to build automatic, on-sight recognition.
       </p>
 
       <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">How a session works</h3>
