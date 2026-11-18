@@ -329,21 +329,27 @@
     .prompt-overlay.visible { display: flex; }
     .prompt-box {
       background: #fff; border-radius: 24px;
-      padding: 24px 26px; max-width: 520px; width: 100%;
+      padding: 28px 26px 18px; max-width: 560px; width: 100%;
       text-align: center; box-shadow: 0 12px 48px rgba(0,0,0,.4);
       max-height: 88vh; overflow-y: auto;
     }
     .prompt-word {
-      font-size: clamp(4.5rem, 24vw, 8rem); font-weight: 700; line-height: 1;
+      font-size: clamp(6rem, 36vw, 13rem); font-weight: 700; line-height: 1.05;
       font-family: 'Teachers', sans-serif;
-      color: #221a4d; margin-bottom: 18px; word-break: break-word;
+      color: #221a4d; margin: 12px 0 26px; word-break: break-word;
     }
     .prompt-instruction {
-      font-size: .8rem; font-weight: 600; color: #134e4a;
-      line-height: 1.45; margin-bottom: 12px; text-align: center;
+      font-size: .72rem; font-weight: 600; color: #6b6590;
+      line-height: 1.4; margin-bottom: 18px; text-align: center;
     }
-    .prompt-instruction strong { color: #6d28d9; font-weight: 700; line-height: 1.5; }
-    .prompt-instruction em { color: #6d28d9; font-style: normal; font-weight: 900; }
+    .btn-quiet {
+      background: none; border: none; color: #9a94b8; font-family: 'Teachers', sans-serif;
+      font-size: .75rem; font-weight: 600; cursor: pointer; padding: 6px 10px;
+      text-decoration: underline; text-decoration-style: dotted;
+    }
+    .btn-quiet:hover { color: #6d28d9; }
+    .prompt-instruction strong { color: #6b6590; font-weight: 600; line-height: 1.5; }
+    .prompt-instruction em { color: #4c3d8f; font-style: normal; font-weight: 700; }
     .readsecs-row { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
     .readsecs-label { width: 100%; text-align: center; font-size: .8rem; font-weight: 800; color: var(--soft); text-transform: uppercase; letter-spacing: .06em; }
     .btn-readsecs { font: inherit; font-weight: 800; padding: 8px 18px; border-radius: 100px; border: 2px solid var(--border); background: #fff; color: var(--soft); cursor: pointer; }
@@ -1290,7 +1296,7 @@
       <p class="prompt-instruction">
         <strong id="prompt-cta">Read the word aloud.</strong>
       </p>
-      <button class="btn-confirm" id="prompt-done-btn" onclick="handlePromptDone()">Done - answer provided</button>
+      <button class="btn-quiet" id="prompt-done-btn" onclick="handlePromptDone()">Word reviewed</button>
     </div>
   </div>
 
@@ -1514,6 +1520,7 @@
     }
     // What the grown-up says when the word was not read in time or was missed
     function setPromptScript(word) {
+      { const n = Math.max(3, String(word).length); document.getElementById('prompt-word').style.fontSize = `min(13rem, ${Math.floor(66 / (n * 0.58))}vw)`; }
       const w = String(word).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
       document.getElementById('prompt-cta').innerHTML =
         `Say: <br>"This is the word <em>${w}</em>."<br>"Read <em>${w}</em>."<br>"Spell <em>${w}</em>."<br>"What's the word?"`;
@@ -2745,7 +2752,7 @@
         const word = state.session.queue[state.session.cardIndex].w;
         document.getElementById('prompt-word').textContent = word;
         setPromptScript(word);
-        document.getElementById('prompt-done-btn').textContent = 'Done - answer provided';
+        document.getElementById('prompt-done-btn').textContent = 'Word reviewed';
         _promptMode = 'idle';
         document.getElementById('prompt-overlay').classList.add('visible');
         if (state.session && state.session.timerInterval) {
@@ -2763,7 +2770,7 @@
 
     function handlePromptDone() {
       document.getElementById('prompt-overlay').classList.remove('visible');
-      document.getElementById('prompt-done-btn').textContent = 'Done - answer provided';
+      document.getElementById('prompt-done-btn').textContent = 'Word reviewed';
       if (state.session && !state.session.timerInterval) startTimer();
       const mode = _promptMode;
       _promptMode = 'idle';
