@@ -1200,7 +1200,7 @@
       <p class="backup-text">Progress is stored on this device only. Clearing the browser, or using a different phone or computer, would erase it. Save a backup file now and then. To move to a new device, restore the file there.</p>
       <div class="backup-btns">
         <button class="bk-btn" onclick="exportBackup()">Save backup</button>
-        <button class="bk-btn alt" onclick="document.getElementById('backup-file').click()">Restore backup</button>
+        <button class="bk-btn alt" onclick="document.getElementById('backup-file').click()">Restore from backup</button>
         <input id="backup-file" type="file" accept=".json,application/json" hidden onchange="readBackupFile(this)">
       </div>
       <div id="backup-restore" class="backup-restore" hidden>
