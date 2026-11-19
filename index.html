@@ -827,6 +827,14 @@
     .star-rocket { position: absolute; top: -14px; font-size: 1.4rem; transform: translateX(-50%); transition: left .6s; }
     .star-moon { position: absolute; right: -6px; top: -12px; font-size: 1.2rem; }
     [hidden] { display: none !important; }
+    .btn-blast { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; margin: 0 0 24px; padding: 22px 16px;
+      background: linear-gradient(135deg, #fbbf24, #f97316); color: #2a1a00; border: 4px solid #fff7d6; border-radius: 24px;
+      font-family: 'Fredoka', 'Teachers', sans-serif; font-size: clamp(1.8rem, 9vw, 2.6rem); font-weight: 700; letter-spacing: .06em; cursor: pointer;
+      box-shadow: 0 6px 0 #b45309, 0 10px 30px rgba(249,115,22,.45); animation: blastPulse 2s ease-in-out infinite; }
+    .btn-blast .blast-rocket { font-size: 1.3em; display: inline-block; }
+    .btn-blast:active { transform: translateY(4px); box-shadow: 0 2px 0 #b45309, 0 4px 14px rgba(249,115,22,.4); animation: none; }
+    @keyframes blastPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.025); } }
+    @media (prefers-reduced-motion: reduce) { .btn-blast { animation: none; } }
     .assess-btns { display: flex; gap: 14px; justify-content: center; margin: 8px 0 14px; }
     .assess-btn { flex: 1; max-width: 220px; padding: 20px 10px; border: none; border-radius: 20px; font-family: 'Teachers', sans-serif; font-size: 1.4rem; font-weight: 800; color: #fff; cursor: pointer; }
     .assess-btn small { display: block; font-size: .75rem; font-weight: 600; opacity: .9; margin-top: 4px; }
@@ -1179,9 +1187,9 @@
       </div>
       <div class="dash-topbar-btns">
         <button class="btn-fa-topbar" onclick="showFormativeAssessment()">Learning Journey</button>
-        <button class="btn-begin" onclick="showDurationPicker()">🚀 Blast Off</button>
       </div>
     </div>
+    <button class="btn-blast" onclick="showDurationPicker()"><span class="blast-rocket">🚀</span> BLAST OFF!</button>
     <span id="points-goal-label" class="points-label">STARS</span>
     <div class="points-section">
       <div class="points-body">
