@@ -239,26 +239,23 @@
 
     /* ── RESPONSE BUTTONS ── */
     .resp-btns {
-      display: flex; justify-content: center; align-items: center;
-      gap: 6px; margin-bottom: 10px;
+      display: flex; justify-content: center; align-items: stretch;
+      gap: 8px; margin: 0 auto 10px; width: 100%; max-width: 420px; padding: 0 12px; box-sizing: border-box;
     }
+    /* Adult-facing buttons: big enough to find, muted and the same color so kids are not drawn to them. */
     .resp-btn {
-      background: var(--gray-bg);
-      border: 1.5px solid var(--border);
-      border-radius: 100px;
-      padding: 6px 14px;
+      flex: 1 1 0; min-height: 48px;
+      background: rgba(255,255,255,.07);
+      border: 1.5px solid rgba(255,255,255,.26);
+      border-radius: 14px;
+      padding: 8px 2px;
       font-family: 'Teachers', sans-serif;
-      font-size: .78rem; font-weight: 700;
-      color: var(--soft); cursor: pointer;
-      transition: background .15s, color .15s, border-color .15s, transform .1s;
+      font-size: .88rem; font-weight: 700; white-space: nowrap;
+      color: #cfc6ee; cursor: pointer;
       -webkit-tap-highlight-color: transparent;
-      white-space: nowrap;
     }
-    .resp-btn:active       { transform: scale(.93); }
-    .resp-correct:hover    { background: var(--green-bg);  color: var(--green-dk); border-color: var(--green); }
-    .resp-wrong:hover      { background: var(--red-bg);    color: var(--red-dk);   border-color: var(--red); }
-    .resp-provided:hover   { background: var(--amber-bg);  color: var(--amber-dk); border-color: var(--amber); }
-    .resp-divider          { color: var(--border); font-size: .75rem; user-select: none; }
+    .resp-btn:active { background: rgba(255,255,255,.18); transform: scale(.97); }
+    .resp-divider { display: none; }
 
     /* ── RESULTS ── */
     .results-wrap {
@@ -672,6 +669,14 @@
     .btn-duration:active { transform: scale(.94); }
     .dur-num  { font-size: 2.2rem; font-weight: 900; color: #fff; line-height: 1; }
     .dur-unit { font-size: .75rem; font-weight: 700; color: rgba(255,255,255,.75); text-transform: uppercase; letter-spacing: .08em; }
+    .duration-box { max-width: 340px; }
+    .dur-step { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: .88rem; font-weight: 800; color: #e4ddff; margin: 0 0 10px; text-align: left; }
+    .dur-step-n { flex: none; width: 22px; height: 22px; border-radius: 50%; background: #fbbf24; color: #2a1a00; font-size: .8rem; display: inline-flex; align-items: center; justify-content: center; }
+    .dur-secs { display: flex; gap: 8px; margin-bottom: 22px; }
+    .duration-box .btn-readsecs { flex: 1; padding: 10px 6px; border-radius: 12px; background: transparent; border: 2px solid rgba(255,255,255,.3); color: #cfc6ee; font-size: .95rem; }
+    .duration-box .btn-readsecs[aria-pressed="true"] { background: #fbbf24; border-color: #fbbf24; color: #2a1a00; }
+    .duration-box .btn-readsecs[aria-pressed="true"]::before { content: "✓ "; }
+    .duration-box .dur-unit { font-size: .62rem; }
     .btn-dur-cancel {
       background: none; border: none; color: var(--soft);
       font-family: 'Teachers', sans-serif; font-size: .85rem;
@@ -844,9 +849,15 @@
     .how-title { font-size: .8rem; font-weight: 800; color: var(--soft); margin: 4px 2px 8px; }
     .how-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
     .how-opt { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; text-align: left; padding: 12px; border-radius: 14px; cursor: pointer;
-      background: rgba(255,255,255,.04); color: var(--soft); border: 2px solid rgba(255,255,255,.14); font-family: inherit; }
+      background: rgba(251,191,36,.08); color: #fff; border: 2px solid rgba(251,191,36,.6); font-family: inherit; }
     .how-opt.on { border-color: #fbbf24; background: rgba(251,191,36,.14); color: #fff; }
     .how-ic { font-size: 1.3rem; } .how-t { font-weight: 800; font-size: .92rem; } .how-d { font-size: .72rem; opacity: .85; line-height: 1.3; }
+    .next-card { background: #2d2363; border: 2px solid #fbbf24; border-radius: 16px; padding: 14px 16px; margin: 0 0 20px; }
+    .nw-title { font-size: 1rem; font-weight: 800; color: #fff; margin-bottom: 10px; }
+    .link-btn { background: none; border: none; color: #c4b5fd; font: inherit; font-weight: 700; font-size: .78rem; text-decoration: underline; padding: 4px 6px; cursor: pointer; }
+    .ws-block { margin-top: 14px; border-top: 1px solid rgba(255,255,255,.12); padding-top: 8px; }
+    .ws-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 2px 6px; }
+    .ws-block .legend { margin-bottom: 0; }
     .btn-choose.as-link { background: none; box-shadow: none; border: none; color: #c4b5fd; font-weight: 700; font-size: .78rem; text-decoration: underline; padding: 4px 6px; }
     .how-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
     .assess-toggle { display: flex; align-items: center; gap: 8px; margin: 14px 2px 0; font-size: .8rem; font-weight: 700; color: var(--soft); }
@@ -1198,6 +1209,14 @@
       </div>
     </div>
     <button class="btn-blast" onclick="showDurationPicker()"><span class="blast-rocket">🚀</span> BLAST OFF!</button>
+    <div id="next-words-card" class="next-card" hidden>
+      <div id="nw-title" class="nw-title"></div>
+      <div id="nw-act" class="how-actions">
+        <button id="btn-assess" class="btn-choose" onclick="startAssess()">📋 Assess</button>
+        <button id="btn-choose" class="btn-choose" onclick="showPicker()">🎯 Choose Words</button>
+      </div>
+      <button id="nw-change" class="link-btn" onclick="toggleWordMode()"></button>
+    </div>
     <span id="points-goal-label" class="points-label">STARS</span>
     <div class="points-section">
       <div class="points-body">
@@ -1222,6 +1241,18 @@
         <span class="star-moon">🌙</span>
       </div>
       <div class="points-row" hidden><span>Points</span><b id="dash-points">0</b></div>
+      <div id="ws-block" class="ws-block" hidden>
+        <div class="ws-actions">
+          <button class="link-btn" onclick="showPicker()">Edit words</button>
+          <button id="btn-cards" class="link-btn" onclick="openCardsDialog()" hidden>🖨️ Print Mission 1 Practice/Game Cards</button>
+        </div>
+        <div id="word-grid" class="word-grid"></div>
+        <div class="legend">
+          <span><span class="ldot known"></span>Known (3 days in a row, under 4 sec)</span>
+          <span><span class="ldot learning"></span>Practicing</span>
+          <span><span class="ldot unseen"></span>Not yet seen</span>
+        </div>
+      </div>
     </div>
 
     <div class="streak-section">
@@ -1232,30 +1263,6 @@
       <div id="streak-dots" class="streak-dots"></div>
       <p id="streak-message" class="streak-message"></p>
     </div>
-
-    <div class="letter-status-card">
-      <div class="focus-row">
-        <div class="grid-label">Word Status</div>
-      </div>
-      <div class="how-title">How are this student's words chosen?</div>
-      <div class="how-opts">
-        <button id="how-manual" class="how-opt" onclick="setAssessEnabled(false)"><span class="how-ic">✏️</span><span class="how-t">I'll choose the words</span><span class="how-d">Enter the words by hand</span></button>
-        <button id="how-assess" class="how-opt" onclick="setAssessEnabled(true)"><span class="how-ic">📋</span><span class="how-t">Assessment chooses them</span><span class="how-d">Student reads flashcards. First 7 missed words become the mission.</span></button>
-      </div>
-      <div class="how-actions">
-        <button id="btn-assess" class="btn-choose" onclick="startAssess()" hidden>📋 Assess</button>
-        <button id="btn-cards" class="btn-choose" onclick="openCardsDialog()" hidden>🖨️ Print cards</button>
-        <button id="btn-choose" class="btn-choose" onclick="showPicker()">🎯 Choose Words</button>
-      </div>
-      <div id="focus-summary" class="focus-summary"></div>
-      <div id="word-grid" class="word-grid"></div>
-      <div class="legend">
-        <span><span class="ldot known"></span>Known (3 days in a row, under 4 sec)</span>
-        <span><span class="ldot learning"></span>Practicing</span>
-        <span><span class="ldot unseen"></span>Not yet seen</span>
-      </div>
-    </div>
-
 
     <div class="reset-row">
       <button class="btn-danger" onclick="confirmReset()">Reset Progress</button>
@@ -1308,11 +1315,8 @@
     <p id="adult-prompt" class="adult-prompt">Say: <strong>"What word?"</strong></p>
 
     <div class="resp-btns">
-      <button class="resp-btn resp-correct"  onclick="respond('correct')">correct</button>
-      <span class="resp-divider">·</span>
-      <button class="resp-btn resp-wrong"    onclick="respond('incorrect')">incorrect</button>
-      <span class="resp-divider">·</span>
-      <button class="resp-btn resp-provided" onclick="respond('provided')">answer provided</button>
+      <button class="resp-btn resp-correct"  onclick="respond('correct')">✓ Correct</button>
+            <button class="resp-btn resp-wrong"    onclick="respond('incorrect')">✗ Incorrect</button>
     </div>
   </div>
 
@@ -1320,16 +1324,18 @@
   <!-- == DURATION PICKER OVERLAY == -->
   <div id="duration-overlay" class="duration-overlay">
     <div class="duration-box">
-      <h3 class="duration-title">How long?</h3>
-      <div class="readsecs-row"><span class="readsecs-label">Time to read each word</span>
-        <button class="btn-readsecs" data-readsecs="3" aria-pressed="false" onclick="setReadSecs(3)">3 sec</button>
-        <button class="btn-readsecs" data-readsecs="4" aria-pressed="true" onclick="setReadSecs(4)">4 sec</button>
+      <h3 class="duration-title">Ready to blast off?</h3>
+      <div class="dur-step"><span class="dur-step-n">1</span> Seconds allowed to read each word</div>
+      <div class="dur-secs">
+        <button class="btn-readsecs" data-readsecs="3" aria-pressed="false" onclick="setReadSecs(3)">3 seconds</button>
+        <button class="btn-readsecs" data-readsecs="4" aria-pressed="true" onclick="setReadSecs(4)">4 seconds</button>
       </div>
+      <div class="dur-step"><span class="dur-step-n">2</span> How long is the session? Tap to start.</div>
       <div class="duration-btns">
-        <button class="btn-duration" onclick="beginWithDuration(1)"><span class="dur-num">1</span><span class="dur-unit">min</span></button>
-        <button class="btn-duration" onclick="beginWithDuration(2)"><span class="dur-num">2</span><span class="dur-unit">min</span></button>
-        <button class="btn-duration" onclick="beginWithDuration(3)"><span class="dur-num">3</span><span class="dur-unit">min</span></button>
-        <button class="btn-duration" onclick="beginWithDuration(4)"><span class="dur-num">4</span><span class="dur-unit">min</span></button>
+        <button class="btn-duration" onclick="beginWithDuration(1)"><span class="dur-num">1</span><span class="dur-unit">minute</span></button>
+        <button class="btn-duration" onclick="beginWithDuration(2)"><span class="dur-num">2</span><span class="dur-unit">minutes</span></button>
+        <button class="btn-duration" onclick="beginWithDuration(3)"><span class="dur-num">3</span><span class="dur-unit">minutes</span></button>
+        <button class="btn-duration" onclick="beginWithDuration(4)"><span class="dur-num">4</span><span class="dur-unit">minutes</span></button>
       </div>
       <button class="btn-dur-cancel" onclick="closeDurationPicker()">Cancel</button>
     </div>
@@ -1442,7 +1448,7 @@
       <button class="btn-back" onclick="showDashboard()">← Back</button>
       <h2 class="settings-title" id="pick-title">Choose Words</h2>
     </div>
-    <p class="settings-desc">Your child's teacher will tell you which words to choose. <strong>New words</strong> are the ones to learn. <strong>Known words</strong> are ones your child already reads easily; they get mixed in during practice. If the assessment is turned on, it adds each student's next 7 words after the mission is complete. Otherwise the app does not add words on its own.</p>
+    <p class="settings-desc">Ask the teacher which words to choose. First pick a tab: <strong>New words</strong> are the ones to learn, and <strong>Known words</strong> are ones the student already reads easily (they get mixed in during practice). Then tap a word below to select it, or type a word in the search box to find it fast. Tap <strong>Save Words</strong> when done.</p>
     <div class="pick-tabs">
       <button id="pick-tab-learn" class="on learn" onclick="setPickMode('learn')">New words</button>
       <button id="pick-tab-known" class="known" onclick="setPickMode('known')">Known words</button>
@@ -1452,7 +1458,7 @@
       <button class="btn-link" onclick="clearPick()">Clear this list</button>
     </div>
     <div class="pick-search">
-      <input id="pick-search" type="search" placeholder="Type a word to find it" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" oninput="renderPickSuggest()" onkeydown="pickSearchKey(event)" />
+      <input id="pick-search" type="search" placeholder="Search for a word, then tap it to select" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" oninput="renderPickSuggest()" onkeydown="pickSearchKey(event)" />
       <div id="pick-suggest" class="pick-words pick-suggest"></div>
     </div>
     <div id="pick-grid"></div>
@@ -1715,35 +1721,38 @@
     // Words read automatically (Yes) are marked known up front (no stars). Anything else (wrong, slow, sounded out) is a No and counts as a miss.
     // ========================================================
     const ASSESS_MISSES = 7;
-    let assessEnabled = (() => { try { return localStorage.getItem('wordRocket.assess') === '1'; } catch (e) { return false; } })();
-    function setAssessEnabled(on) {
-      assessEnabled = !!on;
-      try { localStorage.setItem('wordRocket.assess', on ? '1' : '0'); } catch (e) { /* remembered for this visit only */ }
-      const s = currentStudent(); if (s) updateAssessButton(s);
+    // Per-student choice: 'manual' (teacher enters words) or 'assess' (assessment chooses them). null = not chosen yet.
+    function wordMode(s) {
+      if (s.wordMode === 'assess' || s.wordMode === 'manual') return s.wordMode;
+      let legacy = false; try { legacy = localStorage.getItem('wordRocket.assess') === '1'; } catch (e) {}
+      return legacy ? 'assess' : 'manual';   // default: the adult enters the words
+    }
+    function toggleWordMode() {
+      const s = currentStudent(); if (!s) return;
+      s.wordMode = wordMode(s) === 'assess' ? 'manual' : 'assess';
+      saveState(); renderDashboard(s);
     }
     function assessNext(s) {
       const a = s.assess || { pos: 0, log: [] };
       for (let i = a.pos; i < WORDS_ALL.length; i++) { if (s.scores[WORDS_ALL[i]] !== 'known') return { w: WORDS_ALL[i], i }; }
       return null;
     }
-    // The Assess button shows when the student has no mission words left to master (or an assessment is half done).
+    // The 'next words' card shows only when the student needs words: none chosen yet, mission complete, or an assessment half done.
     function updateAssessButton(s) {
-      const b = document.getElementById('btn-assess'); if (!b) return;
-      const hm = document.getElementById('how-manual'), ha = document.getElementById('how-assess');
-      if (hm) hm.classList.toggle('on', !assessEnabled);
-      if (ha) ha.classList.toggle('on', assessEnabled);
-      const ch = document.getElementById('btn-choose');
-      const mi0 = missionInfo(s), active = mi0.words.length > 0 && mi0.done < mi0.words.length;
-      if (ch) {
-        ch.classList.toggle('as-link', active);
-        ch.textContent = active ? 'Edit words' : (assessEnabled ? '✏️ Edit words by hand' : '🎯 Choose Words');
-      }
+      const card = document.getElementById('next-words-card'); if (!card) return;
+      const mi = missionInfo(s);
+      const needs = mi.words.length === 0 || mi.done === mi.words.length;
       const inProgress = !!(s.assess && s.assess.log.length);
-      const noMission = targetWords(s).length === 0;
-      const show = assessEnabled && (inProgress || (noMission && !!assessNext(s)));
-      b.hidden = !show;
-      const cb = document.getElementById('btn-cards'); if (cb) cb.hidden = !(assessEnabled && missionInfo(s).words.length > 0);
-      if (show) b.textContent = inProgress ? '📋 Resume assessment' : ((s.focusWords || []).length ? '📋 Assess for next 7 words' : '📋 Assess to find words');
+      const mode = wordMode(s);
+      const hasAny = (s.focusWords || []).length > 0;
+      card.hidden = !(needs || inProgress);
+      document.getElementById('nw-title').textContent = hasAny ? 'Time for new words' : 'Choose the first words';
+      const b = document.getElementById('btn-assess'), ch = document.getElementById('btn-choose');
+      ch.hidden = mode !== 'manual';
+      b.hidden = mode !== 'assess' || !(inProgress || assessNext(s));
+      b.textContent = inProgress ? '📋 Resume assessment' : (hasAny ? '📋 Assess for next 7 words' : '📋 Assess to find words');
+      document.getElementById('nw-change').textContent = mode === 'assess' ? 'Choose the words by hand instead' : 'Use a flashcard assessment to choose the words instead';
+      const cb = document.getElementById('btn-cards'); if (cb) { cb.hidden = !(mode === 'assess' && mi.words.length > 0); cb.textContent = `🖨️ Print Mission ${mi.n} Practice/Game Cards`; }
     }
     function startAssess() {
       const s = currentStudent(); if (!s) return;
@@ -2089,7 +2098,7 @@
       const ul = document.getElementById('student-list');
       ul.innerHTML = '';
       if (!state.students.length) {
-        ul.innerHTML = '<li class="empty-state">No students yet - add one above!</li>';
+        ul.innerHTML = '<li class="empty-state"><strong>Start here.</strong><br>1. Type the student\'s name above and tap + Add.<br>2. Tap their name to open their page.<br>3. Choose their words, then tap Blast Off.</li>';
         return;
       }
       state.students.forEach(student => {
@@ -2139,9 +2148,6 @@
       renderNotes(student);
       const focus = new Set(student.focusWords || []);
       const tw = targetWords(student), kp = knownPool(student);
-      document.getElementById('focus-summary').textContent = (tw.length || kp.length)
-        ? `🚀 Mission ${missionInfo(student).n}: ${missionInfo(student).words.length} word${missionInfo(student).words.length === 1 ? '' : 's'} to master · ${missionInfo(student).done} mastered`
-        : '';
 
       const targets = targetWords(student), knowns = knownPool(student);
       const stars = starCount(student);
@@ -2176,9 +2182,7 @@
       grid.innerHTML = '';
       const missionW = missionInfo(student).words;
       const knownRest = kp.filter(w => !missionW.includes(w));
-      if (!missionW.length && !knownRest.length) {
-        grid.innerHTML = '<div class="empty-pool">No words yet. Tap Choose Words and enter the words your child\'s teacher gave you.</div>';
-      }
+      document.getElementById('ws-block').hidden = !(missionW.length || knownRest.length);
       const addHead = t => { const h = document.createElement('div'); h.className = 'grid-sub'; h.textContent = t; grid.appendChild(h); };
       if (missionW.length) addHead(`🚀 Mission ${missionInfo(student).n} words`);
       missionW.forEach(w => addCell(w));
@@ -3492,7 +3496,7 @@
 
       <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">How a session works</h3>
       <p style="font-family:'Teachers',sans-serif;font-size:.9rem;color:#d6ccf5;line-height:1.6;margin:0 0 14px;">
-        Each session flashes words on cards. Tap <strong style="color:#fff;">✓ Correct</strong> if the student reads it right within the set time (3 or 4 seconds), <strong style="color:#fff;">✗ Incorrect</strong> if they miss it, or <strong style="color:#fff;">answer provided</strong> if you had to tell them. A miss on a new word starts its rehearsal over.
+        Each session flashes words on cards. Tap <strong style="color:#fff;">✓ Correct</strong> if the student reads it right within the set time (3 or 4 seconds), <strong style="color:#fff;">✗ Incorrect</strong> if they miss it, are too slow, or need to be told the word. The app then shows the word with a short script for teaching it. A miss on a new word starts its rehearsal over.
       </p>
 
       <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">Interleaving</h3>
@@ -3507,7 +3511,7 @@
 
       <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">Word sets</h3>
       <p style="font-family:'Teachers',sans-serif;font-size:.9rem;color:#d6ccf5;line-height:1.6;margin:0 0 14px;">
-        Choose how each student's words are chosen on the student's Word Status card: <strong style="color:#fff;">I'll choose the words</strong>, or <strong style="color:#fff;">Assessment chooses them</strong>. When choosing by hand, the app never adds words by itself. The teacher tells the family which words to enter under <strong style="color:#fff;">Choose Words</strong>: new words to learn and words the student already knows. Words are listed A to Z.
+        Each student works on a <strong style="color:#fff;">mission</strong>, a small set of new words to master. By default the teacher or parent enters the words with <strong style="color:#fff;">Choose Words</strong>: new words to learn, and words the student already knows. A teacher can instead switch a student to a flashcard assessment, which finds the student's next 7 missed words and can print practice and game cards for them. When a mission is complete, the student's page asks for new words. While a mission is in progress, the words can still be changed with the small Edit words link. Words are listed A to Z.
       </p>
 
       <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">Points &amp; the goal</h3>
