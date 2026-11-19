@@ -1007,6 +1007,17 @@
     .student-icon { font-size: 1.1rem; margin-right: 2px; }
 
     /* ── QR CODE SECTION ── */
+    .backup-section, .backup-banner { background: #2d2363; border: 2px solid #4c3d8f; border-radius: 16px; padding: 14px 16px; margin: 18px 0 0; }
+    .backup-banner { border-color: #fbbf24; display: flex; flex-direction: column; gap: 10px; font-size: .88rem; font-weight: 700; color: #fff; }
+    .backup-banner[hidden] { display: none; }
+    .bb-btns, .backup-btns { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .backup-title { font-weight: 800; color: #fff; margin-bottom: 6px; }
+    .backup-text { font-size: .8rem; font-weight: 600; color: #cfc6ee; line-height: 1.5; margin: 0 0 10px; }
+    .bk-btn { font: inherit; font-weight: 800; font-size: .85rem; padding: 10px 14px; border-radius: 12px; border: none; background: #fbbf24; color: #2a1a00; cursor: pointer; }
+    .bk-btn.alt { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,.35); }
+    .backup-restore { margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.15); font-size: .82rem; font-weight: 700; color: #fff; }
+    .backup-restore p { margin: 0 0 8px; }
+    .backup-status { font-size: .75rem; font-weight: 700; color: #a99fd6; margin-top: 8px; }
     .qr-section {
       background: none; border-radius: 10px;
       padding: 8px 4px; margin-top: 12px;
@@ -1178,6 +1189,27 @@
       </div>
       <ul id="student-list" class="student-list"></ul>
     </section>
+
+    <div id="backup-banner" class="backup-banner" hidden>
+      <span>💾 Save a backup of your progress so it is not lost if this browser is cleared.</span>
+      <span class="bb-btns"><button class="bk-btn" onclick="exportBackup()">Save backup</button><button class="link-btn" onclick="snoozeBackup()">Later</button></span>
+    </div>
+
+    <div class="backup-section">
+      <div class="backup-title">💾 Save my progress</div>
+      <p class="backup-text">Progress is stored on this device only. Clearing the browser, or using a different phone or computer, would erase it. Save a backup file now and then. To move to a new device, restore the file there.</p>
+      <div class="backup-btns">
+        <button class="bk-btn" onclick="exportBackup()">Save backup</button>
+        <button class="bk-btn alt" onclick="document.getElementById('backup-file').click()">Restore backup</button>
+        <input id="backup-file" type="file" accept=".json,application/json" hidden onchange="readBackupFile(this)">
+      </div>
+      <div id="backup-restore" class="backup-restore" hidden>
+        <p id="backup-restore-msg"></p>
+        <button class="bk-btn" onclick="confirmRestore()">Replace progress on this device</button>
+        <button class="link-btn" onclick="cancelRestore()">Cancel</button>
+      </div>
+      <div id="backup-status" class="backup-status"></div>
+    </div>
 
     <div class="qr-section">
       <div class="qr-header">
@@ -1665,7 +1697,7 @@
       document.getElementById(id).classList.add('active');
       window.scrollTo(0, 0);
     }
-    function showHome()      { renderStudentList(); showScreen('screen-home'); }
+    function showHome()      { renderStudentList(); renderBackupUI(); showScreen('screen-home'); }
     function showDashboard() { const s = currentStudent(); if (!s) return showHome(); renderDashboard(s); showScreen('screen-dashboard'); }
 
     // ========================================================
@@ -2079,7 +2111,7 @@
         li.innerHTML = `
           <div class="student-left" onclick="selectStudent('${student.id}')">
             <span class="student-name"><span class="student-icon">${student.icon||'⭐'}</span>${escHtml(student.name)}</span>
-            <span class="progress-badge">${(() => { const k = knownPool(student).length, t = targetWords(student).length; const mi = missionInfo(student); return (k + t) ? `${starCount(student)} ⭐` + (mi.words.length ? ` · Mission ${mi.n}: ${mi.pts}/${mi.total} pts` : '') : 'No words chosen yet'; })()}</span>
+            <span class="progress-badge">${(() => { const k = knownPool(student).length, t = targetWords(student).length; const mi = missionInfo(student); return (k + t) ? (mi.words.length ? `Mission ${mi.n}: ${mi.pts} of ${mi.total} points` : `${starCount(student)} mastered`) : 'No words chosen yet'; })()}</span>
           </div>
           <button class="btn-customize-inline" onclick="event.stopPropagation();state.currentStudentId='${student.id}';showCustomize()">✏</button>
           <span class="student-arrow" onclick="selectStudent('${student.id}')">›</span>
@@ -3420,6 +3452,72 @@
       } catch(e) { console.warn('Load failed', e); }
     }
 
+    // ---- Backup and restore ----
+    const BK_LAST = 'wordRocket.lastBackup', BK_SNOOZE = 'wordRocket.backupSnooze';
+    const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+    const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* ignore */ } };
+    let _pendingBackup = null;
+    async function exportBackup() {
+      const stamp = new Date().toISOString();
+      const text = JSON.stringify({ app: 'word-rocket', version: 1, exportedAt: stamp, students: state.students });
+      const filename = 'word-rocket-backup-' + stamp.slice(0, 10) + '.json';
+      let saved = false;
+      // Inside the Claude artifact viewer, plain downloads are blocked, so use its save capability when present.
+      let dl = null;
+      try { dl = (window.claude && window.claude.use) ? await window.claude.use('downloads') : null; } catch (e) { dl = null; }
+      if (dl) {
+        try { await dl.save({ filename, data: text }); saved = true; }
+        catch (e) { if (e && e.code === 'declined') return; toast('Could not save the backup here', 'red'); return; }
+      } else {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+        a.download = filename;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+        saved = true;
+      }
+      if (saved) { lsSet(BK_LAST, stamp); renderBackupUI(); toast('Backup saved', 'green'); }
+    }
+    function readBackupFile(inp) {
+      const f = inp.files && inp.files[0]; inp.value = '';
+      if (!f) return;
+      const rd = new FileReader();
+      rd.onload = () => {
+        try {
+          const d = JSON.parse(rd.result);
+          const list = Array.isArray(d) ? d : d.students;
+          if (!Array.isArray(list) || !list.every(x => x && typeof x.name === 'string' && x.scores && typeof x.scores === 'object')) throw new Error('bad');
+          _pendingBackup = list;
+          document.getElementById('backup-restore-msg').textContent = 'Found ' + list.length + ' student' + (list.length === 1 ? '' : 's') + ' (' + list.map(x => x.name).join(', ') + '). Restoring replaces the progress now on this device.';
+          document.getElementById('backup-restore').hidden = false;
+        } catch (e) {
+          _pendingBackup = null;
+          document.getElementById('backup-restore').hidden = true;
+          toast('That file is not a Word Rocket backup', 'red');
+        }
+      };
+      rd.readAsText(f);
+    }
+    function confirmRestore() {
+      if (!_pendingBackup) return;
+      try { localStorage.setItem(STORE, JSON.stringify({ students: _pendingBackup })); } catch (e) { toast('Could not restore on this browser', 'red'); return; }
+      state.students = []; loadState(); state.currentStudentId = null;
+      _pendingBackup = null; document.getElementById('backup-restore').hidden = true;
+      renderStudentList(); renderBackupUI(); toast('Progress restored', 'green');
+    }
+    function cancelRestore() { _pendingBackup = null; document.getElementById('backup-restore').hidden = true; }
+    function snoozeBackup() { lsSet(BK_SNOOZE, String(Date.now() + 7 * 86400000)); renderBackupUI(); }
+    // Reminder: after 3 or more practice days, if never backed up or the last backup is 14+ days old.
+    function renderBackupUI() {
+      const last = lsGet(BK_LAST);
+      const st = document.getElementById('backup-status');
+      if (st) st.textContent = last ? 'Last backup: ' + new Date(last).toLocaleDateString() : 'No backup saved yet.';
+      const banner = document.getElementById('backup-banner'); if (!banner) return;
+      const days = state.students.reduce((n, x) => n + (x.practiceDays || []).length, 0);
+      const stale = !last || (Date.now() - new Date(last).getTime()) > 14 * 86400000;
+      const snoozed = Number(lsGet(BK_SNOOZE) || 0) > Date.now();
+      banner.hidden = !(days >= 3 && stale && !snoozed);
+    }
     function saveState() {
       try {
         localStorage.setItem(STORE, JSON.stringify({ students: state.students }));
