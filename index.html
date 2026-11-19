@@ -1715,8 +1715,8 @@
     // Per-student choice: 'manual' (teacher enters words) or 'assess' (assessment chooses them). null = not chosen yet.
     function wordMode(s) {
       if (s.wordMode === 'assess' || s.wordMode === 'manual') return s.wordMode;
-      let legacy = false; try { legacy = localStorage.getItem('wordRocket.assess') === '1'; } catch (e) {}
-      return legacy ? 'assess' : 'manual';   // default: the adult enters the words
+      // Students who already have hand-entered words stay on manual. Everyone else defaults to the assessment.
+      return (s.focusWords || []).length ? 'manual' : 'assess';
     }
     function toggleWordMode() {
       const s = currentStudent(); if (!s) return;
@@ -1737,7 +1737,7 @@
       const mode = wordMode(s);
       const hasAny = (s.focusWords || []).length > 0;
       card.hidden = !(needs || inProgress);
-      document.getElementById('nw-title').textContent = hasAny ? 'Time for new words' : 'Choose the first words';
+      document.getElementById('nw-title').textContent = hasAny ? 'Time for new words' : (mode === 'assess' ? 'Find the first words' : 'Choose the first words');
       const b = document.getElementById('btn-assess'), ch = document.getElementById('btn-choose');
       ch.hidden = mode !== 'manual';
       b.hidden = mode !== 'assess' || !(inProgress || assessNext(s));
@@ -1748,6 +1748,7 @@
     function startAssess() {
       const s = currentStudent(); if (!s) return;
       if (!s.assess) s.assess = { pos: 0, log: [] };
+      s.wordMode = 'assess';
       if (!assessNext(s)) { toast('All words have been checked', 'green'); return; }
       showScreen('screen-assess'); renderAssess();
     }
@@ -2089,7 +2090,7 @@
       const ul = document.getElementById('student-list');
       ul.innerHTML = '';
       if (!state.students.length) {
-        ul.innerHTML = '<li class="empty-state"><strong>Start here.</strong><br>1. Type the student\'s name above and tap + Add.<br>2. Tap their name to open their page.<br>3. Choose their words, then tap Blast Off.</li>';
+        ul.innerHTML = '<li class="empty-state"><strong>Start here.</strong><br>1. Type the student\'s name above and tap + Add.<br>2. Tap their name to open their page.<br>3. Tap Assess to find their words (or choose them by hand), then tap Blast Off.</li>';
         return;
       }
       state.students.forEach(student => {
@@ -3490,7 +3491,7 @@
 
       <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">Word sets</h3>
       <p style="font-family:'Teachers',sans-serif;font-size:.9rem;color:#d6ccf5;line-height:1.6;margin:0 0 14px;">
-        Each student works on a <strong style="color:#fff;">mission</strong>, a small set of new words to master. By default the teacher or parent enters the words with <strong style="color:#fff;">Choose Words</strong>: new words to learn, and words the student already knows. A teacher can instead switch a student to a flashcard assessment, which finds the student's next 7 missed words and can print practice and game cards for them. When a mission is complete, the student's page asks for new words. While a mission is in progress, the words can still be changed with the small Edit words link. Words are listed A to Z.
+        Each student works on a <strong style="color:#fff;">mission</strong>, a small set of new words to master. By default a flashcard assessment finds the words: the student reads the cards, and the first 7 missed words become the mission. The assessment can print practice and game cards for those words. A teacher or parent can instead switch a student to choosing words by hand with <strong style="color:#fff;">Choose Words</strong>: new words to learn, and words the student already knows. When a mission is complete, the student's page asks for new words. While a mission is in progress, the words can still be changed with the small Edit words link. Words are listed A to Z.
       </p>
 
       <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">Points &amp; the goal</h3>
