@@ -847,6 +847,7 @@
       background: rgba(255,255,255,.04); color: var(--soft); border: 2px solid rgba(255,255,255,.14); font-family: inherit; }
     .how-opt.on { border-color: #fbbf24; background: rgba(251,191,36,.14); color: #fff; }
     .how-ic { font-size: 1.3rem; } .how-t { font-weight: 800; font-size: .92rem; } .how-d { font-size: .72rem; opacity: .85; line-height: 1.3; }
+    .btn-choose.as-link { background: none; box-shadow: none; border: none; color: #c4b5fd; font-weight: 700; font-size: .78rem; text-decoration: underline; padding: 4px 6px; }
     .how-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
     .assess-toggle { display: flex; align-items: center; gap: 8px; margin: 14px 2px 0; font-size: .8rem; font-weight: 700; color: var(--soft); }
     .assess-toggle input { width: 18px; height: 18px; accent-color: var(--accent); }
@@ -1193,7 +1194,7 @@
         <h2 id="dash-name">Student</h2>
       </div>
       <div class="dash-topbar-btns">
-        <button class="btn-fa-topbar" onclick="showFormativeAssessment()">Learning Journey</button>
+        <button class="btn-fa-topbar" onclick="showFormativeAssessment()">Track Progress</button>
       </div>
     </div>
     <button class="btn-blast" onclick="showDurationPicker()"><span class="blast-rocket">🚀</span> BLAST OFF!</button>
@@ -1255,14 +1256,6 @@
       </div>
     </div>
 
-    <div class="notes-section">
-      <div class="notes-header">
-        <span class="notes-label">📝 Teacher Notes</span>
-        <button class="btn-notes-save" id="btn-save-note" onclick="saveNote()">Save</button>
-      </div>
-      <textarea id="notes-input" class="notes-input" placeholder="Add a quick observation…" rows="3" maxlength="500"></textarea>
-      <div id="notes-log" class="notes-log"></div>
-    </div>
 
     <div class="reset-row">
       <button class="btn-danger" onclick="confirmReset()">Reset Progress</button>
@@ -1412,7 +1405,7 @@
   <div id="screen-fa" class="screen">
     <div class="fa-topbar">
       <button class="btn-back" onclick="showDashboard()">← Back</button>
-      <h2 class="fa-title">Learning Journey</h2>
+      <h2 class="fa-title">Track Progress</h2>
       <button class="btn-print" onclick="printReport()">🖨 Print</button>
     </div>
     <p id="fa-student-name" class="fa-student-name"></p>
@@ -1740,7 +1733,11 @@
       if (hm) hm.classList.toggle('on', !assessEnabled);
       if (ha) ha.classList.toggle('on', assessEnabled);
       const ch = document.getElementById('btn-choose');
-      if (ch) ch.textContent = assessEnabled ? '✏️ Edit words by hand' : '🎯 Choose Words';
+      const mi0 = missionInfo(s), active = mi0.words.length > 0 && mi0.done < mi0.words.length;
+      if (ch) {
+        ch.classList.toggle('as-link', active);
+        ch.textContent = active ? 'Edit words' : (assessEnabled ? '✏️ Edit words by hand' : '🎯 Choose Words');
+      }
       const inProgress = !!(s.assess && s.assess.log.length);
       const noMission = targetWords(s).length === 0;
       const show = assessEnabled && (inProgress || (noMission && !!assessNext(s)));
@@ -2157,7 +2154,7 @@
       const ratio = mi.total ? Math.min(1, mi.pts / mi.total) : 0;
       { let m = document.getElementById('mission-label');
         if (!m) { m = document.createElement('div'); m.id = 'mission-label'; m.className = 'mission-label'; const tr = document.querySelector('.star-track'); tr.parentNode.insertBefore(m, tr.nextSibling); }
-        m.textContent = mi.words.length ? `🚀 Mission ${mi.n}: ${mi.pts} of ${mi.total} points · ${mi.done} of ${mi.words.length} words mastered` + (mi.done === mi.words.length ? ' · mission complete!' : '') : ''; }
+        m.textContent = mi.words.length ? `🚀 Mission ${mi.n}: ${mi.pts} of ${mi.total} points` + (mi.done === mi.words.length ? ' · mission complete!' : '') : ''; }
       document.getElementById('dash-stars').innerHTML = `${stars} ⭐ <small>${goal ? 'of ' + goal : ''}</small>`;
       document.getElementById('dash-progress').textContent =
         targets.length ? `Working on ${targets.length} new word${targets.length === 1 ? '' : 's'}` : (knowns.length ? 'Ready for new words' : 'No words chosen yet');
