@@ -1369,7 +1369,7 @@
       <div class="ms-trophy">🏆</div>
       <h2 id="ms-name">You did it!</h2>
       <div class="ms-big" id="ms-stars">⭐</div>
-      <p id="ms-line">Every word you were given is now a star.</p>
+      <p id="ms-line">All of your rocket words are mastered.</p>
       <p id="ms-detail"></p>
       <button class="btn-confirm" onclick="closeMilestone()">Awesome!</button>
       <button class="btn-secondary" onclick="printMilestone()">Print this page</button>
@@ -1555,7 +1555,7 @@
         </svg>
         <div class="res-pie-label">
           <span id="res-pie-pct" class="res-pie-pct">0%</span>
-          <span class="res-pie-sub">of your assigned words</span>
+          <span class="res-pie-sub">in this mission</span>
         </div>
       </div>
 
@@ -2041,7 +2041,9 @@
       const WORD_PTS = [0, 5, 10, 20];
       let pts = 0, done = 0;
       words.forEach(w => { if (s.scores[w] === 'known') { pts += WORD_PTS[3]; done++; } else pts += WORD_PTS[Math.min(passedDays(s, w), 2)]; });
-      return { n: (s.milestoneCount || 0) + 1, words, done, pts, total: words.length * WORD_PTS[3] };
+      // A finished mission keeps its own number until new words replace it.
+      const finished = words.length > 0 && done === words.length && (s.milestoneCount || 0) > 0;
+      return { n: finished ? s.milestoneCount : (s.milestoneCount || 0) + 1, words, done, pts, total: words.length * WORD_PTS[3] };
     }
     function starGoal(s) { return starCount(s) + targetWords(s).length; }
     function knownPool(s) {
@@ -2560,7 +2562,7 @@
       if (!students.length) { panel.innerHTML = '<div class="class-empty">No students yet.</div>'; return; }
 
       const rows = students.map(s => {
-        const mi = missionInfo(s); const pts  = starCount(s) + ' ⭐' + (mi.words.length ? ' · Mission ' + mi.n + ': ' + mi.pts + '/' + mi.total + ' pts' : '');
+        const mi = missionInfo(s); const pts  = starCount(s) + ' mastered' + (mi.words.length ? ' · Mission ' + mi.n + ': ' + mi.pts + '/' + mi.total + ' pts' : '');
         const { known, learning } = countScores(s);
         const knownPct    = Math.round(known/WORDS_ALL.length*100);
         const learningPct = Math.round(learning/WORDS_ALL.length*100);
@@ -2580,7 +2582,7 @@
         <div style="font-size:.72rem;font-weight:700;color:var(--soft);display:flex;gap:14px;margin-bottom:12px">
           <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#166534;margin-right:4px"></span>Known</span>
           <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#92400e;margin-right:4px"></span>Practicing</span>
-          <span style="color:var(--soft)">Sorted by stars ↓</span>
+          <span style="color:var(--soft)">Sorted by words mastered ↓</span>
         </div>
         ${rows}`;
     }
@@ -2871,8 +2873,8 @@
             <div class="meta">${student.name} &nbsp;·&nbsp; ${today_str}</div>
           </div>
           <div style="text-align:right">
-            <div style="font-size:28px;font-weight:900;color:#6d28d9">${pct} ⭐ of ${starGoal(student)}</div>
-            <div style="font-size:10px;color:#94a3b8;font-weight:700">${(() => { const mi = missionInfo(student); return mi.words.length ? `Mission ${mi.n}: ${mi.pts} of ${mi.total} points, ${mi.done} of ${mi.words.length} words mastered` : ""; })()}</div>
+            <div style="font-size:28px;font-weight:900;color:#6d28d9">${pct} of ${starGoal(student)} words mastered</div>
+            <div style="font-size:10px;color:#94a3b8;font-weight:700">${(() => { const mi = missionInfo(student); return mi.words.length ? `Mission ${mi.n}: ${mi.pts} of ${mi.total} points` : ""; })()}</div>
           </div>
         </div>
 
@@ -3150,9 +3152,9 @@
     // Milestone: shown when a student has mastered every word assigned so far. Can be reopened from their dashboard.
     function showMilestone(student) {
       document.getElementById('ms-name').textContent = student.name + ', mission complete!';
-      document.getElementById('ms-line').textContent = `Mission ${student.milestoneCount || 1} is done. Every word you were given is now a star.`;
+      document.getElementById('ms-line').textContent = `Mission ${student.milestoneCount || 1} is done. All of your rocket words are mastered.`;
       const n = student.milestoneStars || starCount(student);
-      document.getElementById('ms-stars').textContent = n + ' ⭐';
+      document.getElementById('ms-stars').textContent = n + (n === 1 ? ' word' : ' words') + ' mastered ⭐';
       const d = student.milestoneAt ? new Date(student.milestoneAt).toLocaleDateString() : '';
       document.getElementById('ms-detail').textContent = (d ? 'Reached on ' + d + '.' : '');
       document.getElementById('milestone-overlay').classList.add('visible');
@@ -3224,8 +3226,8 @@
       }
 
       (() => {
-        const goal = starGoal(student);
-        const ratio = goal ? Math.min(1, stars / goal) : 0;
+        const miPie = missionInfo(student);
+        const ratio = miPie.total ? Math.min(1, miPie.pts / miPie.total) : 0;
         const cx=45, cy=45, r=44;
         const angle = ratio * 2 * Math.PI;
         const x = cx + r * Math.sin(angle), y = cy - r * Math.cos(angle);
@@ -3235,7 +3237,7 @@
           : ratio <= 0 ? `M${cx},${cy}`
           : `M${cx},${cy} L${cx},${cy-r} A${r},${r} 0 ${largeArc},1 ${x},${y} Z`;
         document.getElementById('res-pie').setAttribute('d', d);
-        document.getElementById('res-pie-pct').textContent = stars + ' ⭐';
+        document.getElementById('res-pie-pct').textContent = miPie.total ? miPie.pts + ' pts' : '0 pts';
         if (student) {
           const g = document.getElementById('resPieGrad');
           if (g) {
@@ -3252,7 +3254,7 @@
       ptsEl.classList.toggle('has-points', missionGain > 0);
       document.getElementById('res-pts-total').innerHTML =
         (miNow.words.length ? `Mission ${miNow.n}: <strong>${miNow.pts} of ${miNow.total} points</strong> · ` : '') +
-        (sess.newlyKnown.length ? `<strong>+${sess.newlyKnown.length} ⭐ today</strong>` : (sess.stepWords.length ? `<strong>${sess.stepWords.length} word${sess.stepWords.length === 1 ? '' : 's'} closer to a ⭐</strong>` : 'Nice practice!'));
+        (sess.newlyKnown.length ? `<strong>${sess.newlyKnown.length} word${sess.newlyKnown.length === 1 ? '' : 's'} mastered today</strong>` : (sess.stepWords.length ? `<strong>${sess.stepWords.length} word${sess.stepWords.length === 1 ? '' : 's'} closer to mastered</strong>` : 'Nice practice!'));
 
       if (sess.newlyKnown.length) startLaunches(sess.newlyKnown, () => { if (_msPending) showMilestone(student); });
       else if (_msPending) showMilestone(student);
@@ -3286,8 +3288,8 @@
       const pills = ws => ws.map(w => `<span class="word-pill learning">${escHtml(w)}</span>`).join(' ');
       let bd = '';
       if (sess.launchTotal) bd += `<div class="res-list-row">🚀 Launch check: ${sess.launchOk || 0} of ${sess.launchTotal} ready</div>`;
-      if (sess.newlyKnown.length) bd += `<div class="res-list-row">🎉 Now known: ${pills(sess.newlyKnown)}</div>`;
-      if (sess.stepWords.length) bd += `<div class="res-list-row">⭐ Closer to a star: ${sess.stepWords.map(w => `<span class="word-pill learning">${escHtml(w)} ${stepGlyphs(passedDays(student, w))}</span>`).join(' ')}</div>`;
+      if (sess.newlyKnown.length) bd += `<div class="res-list-row">🎉 Now mastered: ${pills(sess.newlyKnown)}</div>`;
+      if (sess.stepWords.length) bd += `<div class="res-list-row">⭐ Getting closer: ${sess.stepWords.map(w => `<span class="word-pill learning">${escHtml(w)} ${stepGlyphs(passedDays(student, w))}</span>`).join(' ')}</div>`;
       const missed = [...new Set([...sess.wrongWords, ...sess.providedWords])];
       if (missed.length)   bd += `<div class="res-list-row">Missed today: ${pills(missed)}</div>`;
       const slow = [...sess.slowWords].filter(w => !missed.includes(w));
@@ -3433,7 +3435,7 @@
 
     function showInfo() {
       document.getElementById('info-points-text').innerHTML =
-        `Each assigned word the student masters is a <strong style="color:#fff;">star</strong>. Each assigned word is also worth 20 mission points: 5 for the first practice day passed, 5 for the second, and 10 when it becomes a star. The goal grows as new words are added, and finishing every assigned word is a milestone. Words marked known up front do not earn stars. A new word earns its star in 3 steps, one each practice day it is read right within the set time (3 or 4 seconds) every time (★☆☆, ★★☆, then the star).`;
+        `Each word in a mission is worth 20 points: 5 for the first practice day passed, 5 for the second, and 10 when the word is mastered. A word is <strong style="color:#fff;">mastered</strong> after it is read right within the set time (3 or 4 seconds) every time on 3 practice days in a row (★☆☆, ★★☆, then mastered). Mastering every word in a mission completes the mission. Words marked known up front do not count toward points.`;
       document.getElementById('info-modal').style.display = 'flex';
     }
     function hideInfo() {
@@ -3471,7 +3473,7 @@
         Each student works on a <strong style="color:#fff;">mission</strong>, a small set of new words to master. By default a flashcard assessment finds the words: the student reads the cards, and the first 7 missed words become the mission. The assessment can print practice and game cards for those words. A teacher or parent can instead switch a student to choosing words by hand with <strong style="color:#fff;">Choose Words</strong>: new words to learn, and words the student already knows. When a mission is complete, the student's page asks for new words. While a mission is in progress, the words can still be changed with the small Edit words link. Words are listed A to Z.
       </p>
 
-      <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">Points &amp; the goal</h3>
+      <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">Points &amp; missions</h3>
       <p id="info-points-text" style="font-family:'Teachers',sans-serif;font-size:.9rem;color:#d6ccf5;line-height:1.6;margin:0 0 4px;"></p>
 
       <p style="font-family:'Teachers',sans-serif;font-size:.85rem;color:#a89ccf;line-height:1.6;margin:18px 0 0;text-align:center;">
