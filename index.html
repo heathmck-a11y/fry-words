@@ -685,6 +685,12 @@
     }
     .btn-dur-cancel:hover { color: #f5f0ff; }
 
+    .pv-box { background: #fff; border-radius: 16px; max-width: 780px; width: calc(100% - 24px); margin: 12px auto; padding: 14px; }
+    .pv-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+    .pv-top h2 { color: #221a4d; font-size: 1.2rem; font-weight: 800; }
+    .pv-note { color: #6b6590; font-size: .82rem; font-weight: 600; margin: 4px 0 10px; }
+    .pv-paper { border: 1px solid #d9d4ea; background: #fff; overflow: hidden; }
+    .pv-sheet { width: 720px; padding: 0; }
     .btn-print {
       padding: 9px 16px; background: var(--surface2);
       border: 2px solid var(--border); border-radius: var(--radius);
@@ -1396,8 +1402,17 @@
         <label>Copies of each word <select id="cards-copies" style="font:inherit;padding:2px 6px"><option>1</option><option selected>2</option><option>3</option></select></label><br>
         <label>ZAP! cards <select id="cards-meteors" style="font:inherit;padding:2px 6px"><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select></label>
       </div>
-      <button class="btn-confirm" style="margin-top:16px" onclick="printMissionCards()">Print</button>
+      <button class="btn-confirm" style="margin-top:16px" onclick="printMissionCards()">Preview cards</button>
       <button class="btn-quiet" onclick="document.getElementById('cards-overlay').classList.remove('visible')">Cancel</button>
+    </div>
+  </div>
+
+  <div id="cards-preview" class="pause-overlay" style="align-items:flex-start;overflow-y:auto">
+    <div class="pv-box">
+      <div class="pv-top"><h2>Preview</h2>
+        <div><button class="btn-confirm" onclick="printPreviewCards()">Print</button> <button class="btn-quiet" onclick="closeCardsPreview()">Close</button></div></div>
+      <p id="cards-preview-note" class="pv-note"></p>
+      <div class="pv-paper"><div id="cards-preview-sheet" class="pc pv-sheet"></div></div>
     </div>
   </div>
 
@@ -1872,48 +1887,61 @@
       const meteors = parseInt(document.getElementById('cards-meteors').value, 10) || 3;
       const col = /^#[0-9a-fA-F]{6}$/.test(s.color || '') ? s.color : '#7c3aed';
       const name = escHtml(s.name);
-      const rocket = (sz, c) => `<svg width="${sz}" height="${sz}" viewBox="0 0 40 40"><path d="M20 3 C28 10 29 20 27 30 L13 30 C11 20 12 10 20 3Z" fill="#fff" stroke="${c}" stroke-width="2"/><circle cx="20" cy="16" r="4" fill="${c}"/><path d="M13 24 L6 32 L13 31Z M27 24 L34 32 L27 31Z" fill="${c}"/><path d="M16 31 Q20 40 24 31Z" fill="#f59e0b"/></svg>`;
-      const star = c => `<svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 0 L7.5 4.5 L12 6 L7.5 7.5 L6 12 L4.5 7.5 L0 6 L4.5 4.5Z" fill="${c}"/></svg>`;
-      const fs = w => w.length <= 3 ? 50 : w.length <= 5 ? 40 : w.length <= 7 ? 29 : w.length <= 9 ? 24 : 20;
+      const star = c => `<svg width="8" height="8" viewBox="0 0 12 12"><path d="M6 0 L7.5 4.5 L12 6 L7.5 7.5 L6 12 L4.5 7.5 L0 6 L4.5 4.5Z" fill="${c}"/></svg>`;
+      const fs = w => w.length <= 3 ? 34 : w.length <= 5 ? 30 : w.length <= 7 ? 26 : w.length <= 9 ? 22 : 18;
       const wordCard = w => `<div class="cell"><div class="card" style="border-color:${col}">
           <div class="top">${star(col)}<span style="color:${col}">${name}'s rocket</span>${star(col)}</div>
-          <div class="wd" style="font-size:${fs(w)}pt">${escHtml(w)}</div>
-          <div class="bot">${rocket(34, col)}</div></div></div>`;
-      const meteorCard = () => `<div class="cell"><div class="card" style="border-color:${col}">
+          <div class="wd" style="font-size:${fs(w)}pt">${escHtml(w)}</div></div></div>`;
+      const zapCard = () => `<div class="cell"><div class="card" style="border-color:${col}">
           <div class="top">${star('#f59e0b')}<span style="color:${col}">${name}'s rocket</span>${star('#f59e0b')}</div>
-          <div class="art"><svg width="120" height="120" viewBox="0 0 120 120">
-            <path d="M60 4 L70 34 L100 22 L82 48 L116 60 L82 72 L100 98 L70 86 L60 116 L50 86 L20 98 L38 72 L4 60 L38 48 L20 22 L50 34Z" fill="#fbbf24" stroke="#f59e0b" stroke-width="2" stroke-linejoin="round"/>
-            <path d="M68 20 L42 64 L58 64 L50 100 L80 54 L63 54Z" fill="#ef4444" stroke="#b91c1c" stroke-width="2" stroke-linejoin="round"/></svg></div>
-          <div class="wd" style="font-size:22pt;color:${col};font-weight:900">ZAP!</div>
-          <div class="bot" style="font-size:8pt;color:#6b6590;font-weight:700">Put all your cards back</div></div></div>`;
+          <div class="zaprow"><svg width="26" height="26" viewBox="0 0 120 120"><path d="M60 4 L70 34 L100 22 L82 48 L116 60 L82 72 L100 98 L70 86 L60 116 L50 86 L20 98 L38 72 L4 60 L38 48 L20 22 L50 34Z" fill="#fbbf24" stroke="#f59e0b" stroke-width="4" stroke-linejoin="round"/><path d="M68 20 L42 64 L58 64 L50 100 L80 54 L63 54Z" fill="#ef4444"/></svg><span class="wd" style="font-size:22pt;color:${col};font-weight:900">ZAP!</span></div>
+          <div class="bot">Put all your cards back</div></div></div>`;
+      const dirs = `<div class="dir"><strong style="color:${col}">Rocket Words at home.</strong> Cut out the cards along the dashed lines and drop them all into an empty tissue box. Take turns pulling out one card. <strong>Word card:</strong> read it right away, without sounding it out. If you read it, keep it. If not, a grown-up says the word and the card goes back in the box. <strong>ZAP! card:</strong> put all of your cards back in the box. When the box is empty or time is up, count your cards. Then play again!</div>`;
       let deck = [];
       words.forEach(w => { for (let i = 0; i < copies; i++) deck.push(wordCard(w)); });
-      for (let i = 0; i < meteors; i++) deck.push(meteorCard());
-      const dirs = `<div class="dir"><strong style="color:${col}">Rocket Words at home.</strong> Cut out the cards along the dashed lines and drop them all into an empty tissue box. Take turns pulling out one card. <strong>Word card:</strong> read it right away, without sounding it out. If you read it, keep it. If not, a grown-up says the word and the card goes back in the box. <strong>ZAP! card:</strong> put all of your cards back in the box. When the box is empty or time is up, count your cards. Then play again!</div>`;
-      const pages = list => { let out = ''; for (let i = 0; i < list.length; i += 9) out += `<div class="sheet"><div class="grid">${list.slice(i, i + 9).join('')}</div>${i === 0 ? dirs : ''}</div>`; return out; };
-      const container = document.getElementById('print-container');
-      container.innerHTML = `<style>
+      for (let i = 0; i < meteors; i++) deck.push(zapCard());
+      // shuffle so the ZAP! cards are mixed in
+      for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
+      const PER = 27;   // 3 across, 9 down, 2.5 x 1 inch each
+      const pages = list => { let out = ''; for (let i = 0; i < list.length; i += PER) out += `<div class="sheet"><div class="grid">${list.slice(i, i + PER).join('')}</div>${i === 0 ? dirs : ''}</div>`; return out; };
+      const css = `<style>
           @page { size: letter; margin: 0.5in; }
-          @media print {
-          #print-container { font-family: 'Teachers', system-ui, sans-serif; color: #221a4d; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          #print-container * { box-sizing: border-box; margin: 0; padding: 0; }
-          html, body { background: #fff !important; }
-          body::before { display: none !important; }
-          #print-container .grid { display: grid; grid-template-columns: repeat(3, 2.25in); grid-auto-rows: 3in; justify-content: center; }
-          #print-container .sheet { page-break-after: always; }
-          #print-container .sheet:last-child { page-break-after: auto; }
-          #print-container .dir { width: 6.75in; margin: 0.1in auto 0; font-size: 7.5pt; line-height: 1.35; color: #6b6590; }
-          #print-container .cell { width: 2.25in; height: 3in; padding: 0.06in; border: 1px dashed #b8b2d0; }
-          #print-container .card { width: 100%; height: 100%; border: 4px solid; border-radius: 14px; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 7pt 4pt 5pt; text-align: center; }
-          #print-container .top { display: flex; align-items: center; gap: 5pt; font-size: 8pt; font-weight: 800; }
-          #print-container .wd { font-weight: 800; line-height: 1.1; }
-          #print-container .art { line-height: 0; }
-          }
-        </style>
-        ${pages(deck)}`;
+          .pc { font-family: 'Teachers', system-ui, sans-serif; color: #221a4d; -webkit-print-color-adjust: exact; print-color-adjust: exact; background: #fff; }
+          .pc * { box-sizing: border-box; margin: 0; padding: 0; }
+          .pc .grid { display: grid; grid-template-columns: repeat(3, 2.5in); grid-auto-rows: 1in; justify-content: center; }
+          .pc .sheet { page-break-after: always; }
+          .pc .sheet:last-child { page-break-after: auto; }
+          .pc .dir { width: 7.5in; margin: 0.12in auto 0; font-size: 7.5pt; line-height: 1.35; color: #6b6590; }
+          .pc .cell { width: 2.5in; height: 1in; padding: 0.04in; border: 1px dashed #b8b2d0; }
+          .pc .card { width: 100%; height: 100%; border: 2px solid; border-radius: 9px; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 3pt 4pt 3pt; text-align: center; }
+          .pc .top { display: flex; align-items: center; gap: 4pt; font-size: 5.5pt; font-weight: 800; line-height: 1; }
+          .pc .wd { font-weight: 800; line-height: 1; white-space: nowrap; }
+          .pc .zaprow { display: flex; align-items: center; gap: 6pt; }
+          .pc .bot { font-size: 5.5pt; color: #6b6590; font-weight: 700; line-height: 1; }
+          @media print { html, body { background: #fff !important; } body::before { display: none !important; } }
+        </style>`;
+      const html = css + pages(deck);
+      const container = document.getElementById('print-container');
+      container.className = 'pc'; container.innerHTML = html;
       document.getElementById('cards-overlay').classList.remove('visible');
-      window.print();
-      window.addEventListener('afterprint', () => { container.innerHTML = ''; }, { once: true });
+      const sheet = document.getElementById('cards-preview-sheet');
+      sheet.innerHTML = html;
+      const n = deck.length, pgs = Math.ceil(n / PER);
+      document.getElementById('cards-preview-note').textContent = `${n} cards on ${pgs} page${pgs === 1 ? '' : 's'}, 2.5 × 1 inch each. In the print window, set the scale to 100% (actual size).`;
+      document.getElementById('cards-preview').classList.add('visible');
+      fitPreview();
+    }
+    function fitPreview() {
+      const box = document.getElementById('cards-preview-sheet'); if (!box) return;
+      const avail = box.parentElement.clientWidth - 2;
+      box.style.zoom = Math.min(1, avail / 720);
+    }
+    window.addEventListener('resize', () => { if (document.getElementById('cards-preview').classList.contains('visible')) fitPreview(); });
+    function printPreviewCards() { window.print(); }
+    function closeCardsPreview() {
+      document.getElementById('cards-preview').classList.remove('visible');
+      const c = document.getElementById('print-container'); c.innerHTML = ''; c.className = '';
+      document.getElementById('cards-preview-sheet').innerHTML = '';
     }
 
     function showPicker() {
