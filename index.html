@@ -1010,10 +1010,8 @@
     .student-icon { font-size: 1.1rem; margin-right: 2px; }
 
     /* ── QR CODE SECTION ── */
-    .backup-section, .backup-banner { background: #2d2363; border: 2px solid #4c3d8f; border-radius: 16px; padding: 14px 16px; margin: 18px 0 0; }
-    .backup-banner { border-color: #fbbf24; display: flex; flex-direction: column; gap: 10px; font-size: .88rem; font-weight: 700; color: #fff; }
-    .backup-banner[hidden] { display: none; }
-    .bb-btns, .backup-btns { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .backup-section { background: #2d2363; border: 2px solid #4c3d8f; border-radius: 16px; padding: 14px 16px; margin: 18px 0 0; }
+    .backup-btns { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
     .backup-title { font-weight: 800; color: #fff; margin-bottom: 6px; }
     .backup-text { font-size: .8rem; font-weight: 600; color: #cfc6ee; line-height: 1.5; margin: 0 0 10px; }
     .bk-btn { font: inherit; font-weight: 800; font-size: .85rem; padding: 10px 14px; border-radius: 12px; border: none; background: #fbbf24; color: #2a1a00; cursor: pointer; }
@@ -1024,7 +1022,10 @@
     .backup-section.compact .backup-title { white-space: nowrap; }
     .backup-section.compact .bk-btn { font-size: .75rem; padding: 6px 10px; border-radius: 10px; }
     .backup-section.compact .backup-text { font-size: .72rem; line-height: 1.35; margin: 4px 0 0; }
-    .backup-section.compact .backup-status { margin-top: 4px; }
+    .backup-section.compact .backup-status { margin-top: 0; }
+    .backup-status-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; }
+    .backup-section.due { border-color: #fbbf24; }
+    .backup-section.due .backup-status { color: #fbbf24; }
     .bk-btn.alt { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,.35); }
     .backup-restore { margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.15); font-size: .82rem; font-weight: 700; color: #fff; }
     .backup-restore p { margin: 0 0 8px; }
@@ -1201,12 +1202,7 @@
       <ul id="student-list" class="student-list"></ul>
     </section>
 
-    <div id="backup-banner" class="backup-banner" hidden>
-      <span>💾 Save a backup of your progress so it is not lost if this browser is cleared.</span>
-      <span class="bb-btns"><button class="bk-btn" onclick="exportBackup()">Save backup</button><button class="link-btn" onclick="snoozeBackup()">Later</button></span>
-    </div>
-
-    <div class="backup-section compact">
+    <div id="backup-section" class="backup-section compact">
       <div class="backup-row">
         <div class="backup-title">💾 Save my progress</div>
         <div class="backup-btns">
@@ -1221,7 +1217,7 @@
         <button class="bk-btn" onclick="confirmRestore()">Replace progress on this device</button>
         <button class="link-btn" onclick="cancelRestore()">Cancel</button>
       </div>
-      <div id="backup-status" class="backup-status"></div>
+      <div class="backup-status-row"><span id="backup-status" class="backup-status"></span><button id="bk-later" class="link-btn" onclick="snoozeBackup()" hidden>Remind me later</button></div>
     </div>
 
     <div class="qr-section">
@@ -3545,12 +3541,14 @@
     function renderBackupUI() {
       const last = lsGet(BK_LAST);
       const st = document.getElementById('backup-status');
-      if (st) st.textContent = last ? 'Last backup: ' + new Date(last).toLocaleDateString() : 'No backup saved yet.';
-      const banner = document.getElementById('backup-banner'); if (!banner) return;
+      const box = document.getElementById('backup-section'), later = document.getElementById('bk-later');
       const days = state.students.reduce((n, x) => n + (x.practiceDays || []).length, 0);
       const stale = !last || (Date.now() - new Date(last).getTime()) > 14 * 86400000;
       const snoozed = Number(lsGet(BK_SNOOZE) || 0) > Date.now();
-      banner.hidden = !(days >= 3 && stale && !snoozed);
+      const due = days >= 3 && stale && !snoozed;
+      if (box) box.classList.toggle('due', due);
+      if (later) later.hidden = !due;
+      if (st) st.textContent = due ? 'Time to save a backup.' : (last ? 'Last backup: ' + new Date(last).toLocaleDateString() : 'No backup saved yet.');
     }
     function saveState() {
       try {
