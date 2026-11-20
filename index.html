@@ -1446,7 +1446,7 @@
       <p class="prompt-instruction">
         <strong id="prompt-cta">Read the word aloud.</strong>
       </p>
-      <button class="btn-quiet" id="prompt-done-btn" onclick="handlePromptDone()">Word reviewed</button>
+      <button class="btn-quiet" id="prompt-done-btn" onclick="handlePromptDone()">Done</button>
     </div>
   </div>
 
@@ -1894,6 +1894,7 @@
       const container = document.getElementById('print-container');
       container.innerHTML = `<style>
           @page { size: letter; margin: 0.5in; }
+          @media print {
           #print-container { font-family: 'Teachers', system-ui, sans-serif; color: #221a4d; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           #print-container * { box-sizing: border-box; margin: 0; padding: 0; }
           html, body { background: #fff !important; }
@@ -1907,6 +1908,7 @@
           #print-container .top { display: flex; align-items: center; gap: 5pt; font-size: 8pt; font-weight: 800; }
           #print-container .wd { font-weight: 800; line-height: 1.1; }
           #print-container .art { line-height: 0; }
+          }
         </style>
         ${pages(deck)}`;
       document.getElementById('cards-overlay').classList.remove('visible');
@@ -2926,6 +2928,7 @@
       const container = document.getElementById('print-container');
       container.innerHTML = `
         <style>
+          @media print {
           * { box-sizing:border-box; margin:0; padding:0; }
           #print-container { font-family: system-ui, sans-serif; color:#1a2340; padding:32px; max-width:800px; margin:0 auto; }
           h1 { font-size:22px; font-weight:900; color:#6d28d9; }
@@ -2936,6 +2939,7 @@
           .sum-box span { display:block; font-size:24px; font-weight:900; }
           .sum-box label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#5a6484; }
           table { width:100%; border-collapse:collapse; }
+          }
         </style>
 
         <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #6d28d9;padding-bottom:14px;margin-bottom:20px">
@@ -3100,7 +3104,7 @@
         const word = state.session.queue[state.session.cardIndex].w;
         document.getElementById('prompt-word').textContent = word;
         setPromptScript(word);
-        document.getElementById('prompt-done-btn').textContent = 'Word reviewed';
+        document.getElementById('prompt-done-btn').textContent = 'Done';
         _promptMode = 'idle';
         document.getElementById('prompt-overlay').classList.add('visible');
         if (state.session && state.session.timerInterval) {
@@ -3118,7 +3122,7 @@
 
     function handlePromptDone() {
       document.getElementById('prompt-overlay').classList.remove('visible');
-      document.getElementById('prompt-done-btn').textContent = 'Word reviewed';
+      document.getElementById('prompt-done-btn').textContent = 'Done';
       if (state.session && !state.session.timerInterval) startTimer();
       const mode = _promptMode;
       _promptMode = 'idle';
