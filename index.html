@@ -842,6 +842,7 @@
     @keyframes blastPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.025); } }
     @media (prefers-reduced-motion: reduce) { .btn-blast { animation: none; } }
     .assess-btns { display: flex; gap: 10px; justify-content: center; margin: 4px 0 12px; }
+    .btn-quiet-link { background: none; border: none; color: #a89ccf; font: inherit; font-size: .8rem; font-weight: 700; text-decoration: underline; padding: 8px 10px; cursor: pointer; }
     .assess-goal { text-align: center; font-size: 1.05rem; font-weight: 800; color: #fbbf24; margin: 2px 0 8px; }
     .assess-goal b { color: #fff; }
     .assess-dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 8px; }
@@ -1327,6 +1328,7 @@
       <button class="assess-btn bad" onclick="answerAssess(false)">✗ No<small>wrong, slow, or sounded out</small></button>
     </div>
     <p class="adult-prompt">Show the word and ask: "What word?" Tap Yes only if the student reads it automatically, right away and without sounding it out. The 7 words that get a No become the next mission.</p>
+    <div style="text-align:center"><button class="btn-quiet-link" onclick="pauseAssess()">Interrupted? Pause the assessment</button></div>
   </div>
 
   <div id="screen-session" class="screen">
@@ -1838,6 +1840,7 @@
       const last = a.log.pop(); a.pos = last.i; saveState(); renderAssess();
     }
     function exitAssess() { saveState(); showDashboard(); }
+    function pauseAssess() { saveState(); showDashboard(); toast('Assessment paused', 'green'); }
     function finishAssess() {
       const s = currentStudent(), a = s.assess;
       const missed = a.log.filter(x => !x.ok).map(x => x.w), right = a.log.filter(x => x.ok).map(x => x.w);
