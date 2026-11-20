@@ -848,6 +848,7 @@
     @keyframes blastPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.025); } }
     @media (prefers-reduced-motion: reduce) { .btn-blast { animation: none; } }
     .assess-btns { display: flex; gap: 10px; justify-content: center; margin: 4px 0 12px; }
+    .card-kind { text-align: center; font-size: .68rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: rgba(168,156,207,.4); margin: -4px 0 8px; min-height: 1em; }
     .btn-quiet-link { background: none; border: none; color: #a89ccf; font: inherit; font-size: .8rem; font-weight: 700; text-decoration: underline; padding: 8px 10px; cursor: pointer; }
     .assess-goal { text-align: center; font-size: 1.05rem; font-weight: 800; color: #fbbf24; margin: 2px 0 8px; }
     .assess-goal b { color: #fff; }
@@ -1362,6 +1363,7 @@
         <span id="card-word-text" class="card-word-text">the</span>
       </div>
     </div>
+    <div id="card-kind" class="card-kind" aria-hidden="true"></div>
 
     <p id="adult-prompt" class="adult-prompt">Say: <strong>"What word?"</strong></p>
 
@@ -1724,7 +1726,6 @@
       document.getElementById('prompt-cta').innerHTML =
         `Say: <br>"This is the word <em>${w}</em>."<br>"Read <em>${w}</em>."<br>"Spell <em>${w}</em>."<br>"What's the word?"`;
     }
-    const IR_MAX_KNOWN        = 9;      // known words folded in around each new word
     // Stars: one per assigned word mastered, out of the words assigned so far.
     const PTS_CORRECT         = 1;      // any word read correctly
     const PTS_NEW_CORRECT     = 2;      // a new word read correctly within the set time (3 or 4 seconds) (instead of 1)
@@ -2371,11 +2372,12 @@
     // ========================================================
     // SESSION - BUILD QUEUE
     // ========================================================
-    // Incremental rehearsal. For each new word T with known words K:
-    //   T k · T k k · T k k k ... up to IR_MAX_KNOWN knowns.
-    // The known words in every round are drawn at random so the child
-    // cannot learn the order. Once T has been folded in it joins the
-    // knowns for the next new word.
+    // Spaced practice with retries. Every word being learned comes back during the session:
+    //   missed or too slow -> back after 2 cards; fast and correct -> back after 3, then 5, then 8 cards.
+    //   4 fast correct reads in a row finishes the word for this session. Known words fill the gaps.
+    const REP_MISS_GAP = 2;
+    const REP_GAPS     = [3, 5, 8];
+    const REP_DONE     = 4;
     // Launch check: at the start of a session, one cold read of each word that passed on an earlier day and is not mastered yet.
     function launchWords(student) {
       const t = today();
@@ -2385,12 +2387,17 @@
         return passedDays(student, w) >= 1 && !h.some(e => e.date === t);
       });
     }
+    function pickFiller(knowns, prev) {
+      const c = knowns.filter(w => !prev || w !== prev.w);
+      return c.length ? c[Math.floor(Math.random() * c.length)] : null;
+    }
+    // First cards of a session: the launch check, then each word being learned once, with a known word between them.
     function buildQueue(student, withLaunch) {
       const targets  = targetWords(student);
       const learning = targets.filter(w => student.scores[w] === 'learning');
       const unseen   = targets.filter(w => student.scores[w] !== 'learning');
       const ordered  = [...learning, ...unseen];
-      let knowns     = knownPool(student);
+      const knowns   = knownPool(student);
       const q = [];
       if (withLaunch) shuffle(launchWords(student)).forEach(w => q.push({ w, target: false, launch: true, block: 0 }));
 
@@ -2398,18 +2405,37 @@
         shuffle(knowns).forEach(w => q.push({ w, target: false, block: 0 }));
         return q;
       }
-
       ordered.forEach(t => {
-        const start = q.length;
-        const n = Math.min(knowns.length, IR_MAX_KNOWN);
-        if (!n) { q.push({ w: t, target: true, block: start }); return; }
-        for (let i = 1; i <= n; i++) {
-          q.push({ w: t, target: true, block: start });
-          shuffle(knowns).slice(0, i).forEach(k => q.push({ w: k, target: false, block: start }));
-        }
-        knowns = [t, ...knowns];
+        q.push({ w: t, target: true, block: 0 });
+        const f = pickFiller(knowns, q[q.length - 1]);
+        if (f) q.push({ w: f, target: false, block: 0 });
       });
       return q;
+    }
+    // After a card for a word being learned is answered, put it back into the queue.
+    function scheduleTarget(sess, student, idx, item, good) {
+      const r = sess.reps[item.w] || (sess.reps[item.w] = { run: 0 });
+      let gap;
+      if (good) {
+        r.run++;
+        if (r.run >= REP_DONE) return;                      // finished for this session
+        gap = REP_GAPS[Math.min(r.run, REP_GAPS.length) - 1];
+      } else { r.run = 0; gap = REP_MISS_GAP; }
+      const q = sess.queue, knowns = knownPool(student);
+      const pos = idx + 1 + gap;
+      while (q.length < pos) {                              // keep the gap by filling with known words
+        const f = pickFiller(knowns, q[q.length - 1]);
+        if (!f) break;
+        q.push({ w: f, target: false, block: 0 });
+      }
+      q.splice(Math.min(pos, q.length), 0, { w: item.w, target: true, block: 0 });
+    }
+    // Every word being learned is finished: review known words, or go around again if there are none.
+    function refillQueue(sess, student) {
+      const knowns = knownPool(student);
+      if (knowns.length) return shuffle(knowns).map(w => ({ w, target: false, block: 0 }));
+      sess.reps = {};
+      return targetWords(student).map(w => ({ w, target: true, block: 0 }));
     }
 
     function startSession() {
@@ -2425,6 +2451,7 @@
       state.session = {
         launchTotal:     queue.filter(x => x.launch).length, launchDone: 0, launchOk: 0, missionStart: missionInfo(student).pts,
         queue,
+        reps:            {},
         dayPass:         {},
         slowWords:       new Set(),
         newlyKnown:      [],
@@ -3101,7 +3128,7 @@
       const student = currentStudent();
 
       if (sess.cardIndex >= sess.queue.length) {
-        sess.queue     = buildQueue(student);
+        sess.queue     = refillQueue(sess, student);
         sess.cardIndex = 0;
       }
 
@@ -3116,6 +3143,8 @@
       document.getElementById('card-word-text').textContent = word;
       fitWord(document.getElementById('card-word-text'));
       document.getElementById('launch-label').hidden = !sess.queue[sess.cardIndex].launch;
+      { const it = sess.queue[sess.cardIndex], run = (sess.reps[it.w] || { run: 0 }).run;
+        document.getElementById('card-kind').textContent = it.launch ? 'Launch check' : it.target ? `Learning word · ${run} of ${REP_DONE} on time` : 'Known word'; }
 
       sess.cardShownAt = Date.now();
       startIdleTimer();
@@ -3223,13 +3252,15 @@
         } else {
           awardPoints(item.target ? PTS_NEW_CORRECT : PTS_CORRECT);
         }
+        if (item.target) scheduleTarget(sess, student, sess.cardIndex, item, responseTime <= fluentMs());
         sess.cardIndex++;
       } else {
         if (outcome === 'provided') { sess.totalProvided++; sess.providedWords.add(word); }
         else                        { sess.totalWrong++;    sess.wrongWords.add(word); }
         sess.dayPass[word] = false;
-        // A miss on a new word restarts its rehearsal from the beginning
-        sess.cardIndex = item.target ? item.block : sess.cardIndex + 1;
+        // A miss on a word being learned brings it back after a couple of cards
+        if (item.target) scheduleTarget(sess, student, sess.cardIndex, item, false);
+        sess.cardIndex++;
       }
 
       if (item.launch) {
@@ -3627,12 +3658,12 @@
 
       <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">How a session works</h3>
       <p style="font-family:'Teachers',sans-serif;font-size:.9rem;color:#d6ccf5;line-height:1.6;margin:0 0 14px;">
-        Each session flashes words on cards. Tap <strong style="color:#fff;">✓ Correct</strong> if the student reads it right within the set time (3 or 4 seconds), <strong style="color:#fff;">✗ Incorrect</strong> if they miss it, are too slow, or need to be told the word. The app then shows the word with a short script for teaching it. A miss on a new word starts its rehearsal over.
+        Each session flashes words on cards. Tap <strong style="color:#fff;">✓ Correct</strong> if the student reads it right within the set time (3 or 4 seconds), <strong style="color:#fff;">✗ Incorrect</strong> if they miss it, are too slow, or need to be told the word. The app then shows the word with a short script for teaching it. A word that is missed or read too slowly comes back after a couple of cards.
       </p>
 
-      <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">Interleaving</h3>
+      <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">How words come back</h3>
       <p style="font-family:'Teachers',sans-serif;font-size:.9rem;color:#d6ccf5;line-height:1.6;margin:0 0 14px;">
-        Practice uses <strong style="color:#fff;">incremental rehearsal</strong>: a new word is shown, then mixed with one known word, then two, then three, and so on. The known words come up in a random order each round so the student reads the word, not the pattern.
+        Each word being learned comes back during the session, with known words between. A word that is missed or read too slowly comes back after 2 cards. A word read right on time comes back after 3 cards, then 5, then 8. After 4 on-time reads in a row, the word is finished for that session.
       </p>
 
       <h3 style="font-family:'Teachers',sans-serif;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#c4b5fd;margin:0 0 8px;">Spaced repetition</h3>
