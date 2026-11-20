@@ -229,7 +229,7 @@
     .card-word-text {
       font-size: clamp(2.4rem, 12vw, 4.2rem); font-family: 'Teachers', sans-serif;
       font-weight: 700; color: #221a4d; user-select: none; line-height: 1;
-      text-align: center; word-break: break-word;
+      text-align: center; white-space: nowrap;
     }
 
     .adult-prompt {
@@ -333,7 +333,7 @@
     .prompt-word {
       font-size: clamp(6rem, 36vw, 13rem); font-weight: 700; line-height: 1.05;
       font-family: 'Teachers', sans-serif;
-      color: #221a4d; margin: 12px 0 26px; word-break: break-word;
+      color: #221a4d; margin: 12px 0 26px; white-space: nowrap;
     }
     .prompt-instruction {
       font-size: .72rem; font-weight: 600; color: #6b6590;
@@ -1017,6 +1017,14 @@
     .backup-title { font-weight: 800; color: #fff; margin-bottom: 6px; }
     .backup-text { font-size: .8rem; font-weight: 600; color: #cfc6ee; line-height: 1.5; margin: 0 0 10px; }
     .bk-btn { font: inherit; font-weight: 800; font-size: .85rem; padding: 10px 14px; border-radius: 12px; border: none; background: #fbbf24; color: #2a1a00; cursor: pointer; }
+    .backup-section.compact { padding: 8px 12px; }
+    .backup-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+    .backup-section.compact .backup-title { margin: 0; font-size: .85rem; }
+    .backup-section.compact .backup-btns { gap: 6px; }
+    .backup-section.compact .backup-title { white-space: nowrap; }
+    .backup-section.compact .bk-btn { font-size: .75rem; padding: 6px 10px; border-radius: 10px; }
+    .backup-section.compact .backup-text { font-size: .72rem; line-height: 1.35; margin: 4px 0 0; }
+    .backup-section.compact .backup-status { margin-top: 4px; }
     .bk-btn.alt { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,.35); }
     .backup-restore { margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.15); font-size: .82rem; font-weight: 700; color: #fff; }
     .backup-restore p { margin: 0 0 8px; }
@@ -1198,14 +1206,16 @@
       <span class="bb-btns"><button class="bk-btn" onclick="exportBackup()">Save backup</button><button class="link-btn" onclick="snoozeBackup()">Later</button></span>
     </div>
 
-    <div class="backup-section">
-      <div class="backup-title">💾 Save my progress</div>
-      <p class="backup-text">Progress is stored on this device only. Clearing the browser, or using a different phone or computer, would erase it. Save a backup file now and then. To move to a new device, restore the file there.</p>
-      <div class="backup-btns">
-        <button class="bk-btn" onclick="exportBackup()">Save backup</button>
-        <button class="bk-btn alt" onclick="document.getElementById('backup-file').click()">Restore from backup</button>
-        <input id="backup-file" type="file" accept=".json,application/json" hidden onchange="readBackupFile(this)">
+    <div class="backup-section compact">
+      <div class="backup-row">
+        <div class="backup-title">💾 Save my progress</div>
+        <div class="backup-btns">
+          <button class="bk-btn" onclick="exportBackup()">Save backup</button>
+          <button class="bk-btn alt" onclick="document.getElementById('backup-file').click()">Restore from backup</button>
+          <input id="backup-file" type="file" accept=".json,application/json" hidden onchange="readBackupFile(this)">
+        </div>
       </div>
+      <p class="backup-text">Stored on this device only. Save a file now and then.</p>
       <div id="backup-restore" class="backup-restore" hidden>
         <p id="backup-restore-msg"></p>
         <button class="bk-btn" onclick="confirmRestore()">Replace progress on this device</button>
@@ -1674,9 +1684,23 @@
       try { localStorage.setItem('wordRocket.readSecs', String(readSecs)); } catch (e) { /* remembered for this visit only */ }
       document.querySelectorAll('[data-readsecs]').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.readsecs) === readSecs)));
     }
+    // Shrink a word until it fits on one line, so long words like "against" are never split across lines.
+    function fitWord(el) {
+      if (!el) return;
+      const run = () => {
+        el.style.fontSize = '';
+        const box = el.parentElement; if (!box || !box.clientWidth) return;
+        const cs = getComputedStyle(box);
+        const avail = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 4;
+        const need = el.scrollWidth;
+        if (need > avail) el.style.fontSize = (parseFloat(getComputedStyle(el).fontSize) * avail / need * 0.97) + 'px';
+      };
+      run(); requestAnimationFrame(run);
+    }
+    window.addEventListener('resize', () => { ['prompt-word', 'card-word-text', 'assess-word'].forEach(id => { const e = document.getElementById(id); if (e && e.offsetParent) fitWord(e); }); });
     // What the grown-up says when the word was not read in time or was missed
     function setPromptScript(word) {
-      { const n = Math.max(3, String(word).length); document.getElementById('prompt-word').style.fontSize = `min(13rem, ${Math.floor(66 / (n * 0.58))}vw)`; }
+      fitWord(document.getElementById('prompt-word'));
       const w = String(word).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
       document.getElementById('prompt-cta').innerHTML =
         `Say: <br>"This is the word <em>${w}</em>."<br>"Read <em>${w}</em>."<br>"Spell <em>${w}</em>."<br>"What's the word?"`;
@@ -1798,6 +1822,7 @@
       document.getElementById('assess-title').textContent = 'Assessment: ' + s.name;
       document.getElementById('assess-sub').textContent = `Missed ${missed} of ${ASSESS_MISSES} · word ${n.i + 1} of ${WORDS_ALL.length}`;
       document.getElementById('assess-word').textContent = n.w;
+      fitWord(document.getElementById('assess-word'));
       document.getElementById('assess-undo').disabled = !a.log.length;
     }
     function answerAssess(ok) {
@@ -3051,6 +3076,7 @@
       card.classList.add('flip');
 
       document.getElementById('card-word-text').textContent = word;
+      fitWord(document.getElementById('card-word-text'));
       document.getElementById('launch-label').hidden = !sess.queue[sess.cardIndex].launch;
 
       sess.cardShownAt = Date.now();
