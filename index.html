@@ -841,9 +841,14 @@
     .btn-blast:active { transform: translateY(4px); box-shadow: 0 2px 0 #b45309, 0 4px 14px rgba(249,115,22,.4); animation: none; }
     @keyframes blastPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.025); } }
     @media (prefers-reduced-motion: reduce) { .btn-blast { animation: none; } }
-    .assess-btns { display: flex; gap: 14px; justify-content: center; margin: 8px 0 14px; }
-    .assess-btn { flex: 1; max-width: 220px; padding: 20px 10px; border: none; border-radius: 20px; font-family: 'Teachers', sans-serif; font-size: 1.4rem; font-weight: 800; color: #fff; cursor: pointer; }
-    .assess-btn small { display: block; font-size: .75rem; font-weight: 600; opacity: .9; margin-top: 4px; }
+    .assess-btns { display: flex; gap: 10px; justify-content: center; margin: 4px 0 12px; }
+    .assess-goal { text-align: center; font-size: 1.05rem; font-weight: 800; color: #fbbf24; margin: 2px 0 8px; }
+    .assess-goal b { color: #fff; }
+    .assess-dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 8px; }
+    .assess-dots i { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #8b7fc7; background: transparent; }
+    .assess-dots i.on { background: #ef4444; border-color: #ef4444; }
+    .assess-btn { flex: 1; max-width: 170px; padding: 10px 8px; border: none; border-radius: 14px; font-family: 'Teachers', sans-serif; font-size: 1.1rem; font-weight: 800; color: #fff; cursor: pointer; }
+    .assess-btn small { display: block; font-size: .66rem; font-weight: 600; opacity: .9; margin-top: 2px; }
     .assess-btn.ok { background: var(--green-dk); } .assess-btn.bad { background: var(--red-dk); }
     .assess-btn:active { transform: scale(.96); }
     .how-title { font-size: .8rem; font-weight: 800; color: var(--soft); margin: 4px 2px 8px; }
@@ -1310,17 +1315,18 @@
   <!-- == SCREEN: SESSION == -->
   <div id="screen-assess" class="screen">
     <div class="session-topbar">
-      <button class="btn-back" onclick="exitAssess()">← Save &amp; exit</button>
       <button id="assess-undo" class="btn-pause" onclick="undoAssess()">Undo</button>
     </div>
     <h2 id="assess-title" class="settings-title" style="text-align:center;color:var(--text)">Assessment</h2>
-    <p id="assess-sub" class="settings-desc" style="text-align:center"></p>
+    <div class="assess-goal">Keep going until <b>7 words</b> are missed</div>
+    <div id="assess-dots" class="assess-dots" aria-hidden="true"></div>
+    <p id="assess-sub" class="settings-desc" style="text-align:center;margin-bottom:0"></p>
     <div class="card-stage"><div class="flashcard"><span id="assess-word" class="card-word-text"></span></div></div>
     <div class="assess-btns">
       <button class="assess-btn ok" onclick="answerAssess(true)">✓ Yes<small>automatic</small></button>
-      <button class="assess-btn bad" onclick="answerAssess(false)">✗ No<small>incorrect or not automatic</small></button>
+      <button class="assess-btn bad" onclick="answerAssess(false)">✗ No<small>wrong, slow, or sounded out</small></button>
     </div>
-    <p class="adult-prompt">Show the word and ask: "What word?" Tap Yes only if the student reads it automatically, right away and without sounding it out. Tap No if the read is wrong, slow, or sounded out. The assessment stops when 7 words get a No, and those 7 become the next mission.</p>
+    <p class="adult-prompt">Show the word and ask: "What word?" Tap Yes only if the student reads it automatically, right away and without sounding it out. The 7 words that get a No become the next mission.</p>
   </div>
 
   <div id="screen-session" class="screen">
@@ -1817,6 +1823,7 @@
       if (!n || missed >= ASSESS_MISSES) return finishAssess();
       document.getElementById('assess-title').textContent = 'Assessment: ' + s.name;
       document.getElementById('assess-sub').textContent = `Missed ${missed} of ${ASSESS_MISSES} · word ${n.i + 1} of ${WORDS_ALL.length}`;
+      document.getElementById('assess-dots').innerHTML = Array.from({ length: ASSESS_MISSES }, (_, i) => `<i class="${i < missed ? 'on' : ''}"></i>`).join('');
       document.getElementById('assess-word').textContent = n.w;
       fitWord(document.getElementById('assess-word'));
       document.getElementById('assess-undo').disabled = !a.log.length;
