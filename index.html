@@ -858,6 +858,9 @@
     .ws-card { background: #2d2363; border: 2px solid #4c3d8f; border-radius: 16px; padding: 12px 16px; margin: 0 0 20px; }
     .ws-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 2px 6px; }
     .ws-card .legend { margin-bottom: 0; }
+    .cards-box { padding: 14px 16px; text-align: center; }
+    .cards-title { font-weight: 800; color: #fff; font-size: 1rem; }
+    .cards-note { margin: 4px 0 12px; color: #c4b5fd; font-size: .85rem; }
     .btn-choose.as-link { background: none; box-shadow: none; border: none; color: #c4b5fd; font-weight: 700; font-size: .78rem; text-decoration: underline; padding: 4px 6px; }
     .how-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
     .assess-toggle { display: flex; align-items: center; gap: 8px; margin: 14px 2px 0; font-size: .8rem; font-weight: 700; color: var(--soft); }
@@ -1268,7 +1271,6 @@
     <div id="ws-block" class="ws-card" hidden>
       <div class="ws-actions">
         <button class="link-btn" onclick="showPicker()">Edit words</button>
-        <button id="btn-cards" class="link-btn" onclick="openCardsDialog()" hidden>🖨️ Print Mission 1 Practice/Game Cards</button>
       </div>
       <div id="word-grid" class="word-grid"></div>
       <div class="legend">
@@ -1285,6 +1287,12 @@
       </div>
       <div id="streak-dots" class="streak-dots"></div>
       <p id="streak-message" class="streak-message"></p>
+    </div>
+
+    <div id="cards-box" class="ws-card cards-box" hidden>
+      <div class="cards-title">Practice cards</div>
+      <p class="cards-note">Print the words for this mission as cards for practice and games at home.</p>
+      <button id="btn-cards" class="btn-choose" onclick="openCardsDialog()">🖨️ Print Mission 1 Practice/Game Cards</button>
     </div>
 
     <div class="reset-row">
@@ -1774,7 +1782,7 @@
       b.hidden = mode !== 'assess' || !(inProgress || assessNext(s));
       b.textContent = inProgress ? '📋 Resume assessment' : (hasAny ? '📋 Assess for next 7 words' : '📋 Assess to find words');
       document.getElementById('nw-change').textContent = mode === 'assess' ? 'Choose the words by hand instead' : 'Use a flashcard assessment to choose the words instead';
-      const cb = document.getElementById('btn-cards'); if (cb) { cb.hidden = !(mode === 'assess' && mi.words.length > 0); cb.textContent = `🖨️ Print Mission ${mi.n} Practice/Game Cards`; }
+      const cb = document.getElementById('btn-cards'), cbox = document.getElementById('cards-box'); if (cbox) cbox.hidden = !(mi.words.length > 0); if (cb) { cb.textContent = `🖨️ Print Mission ${mi.n} Practice/Game Cards`; }
     }
     function startAssess() {
       const s = currentStudent(); if (!s) return;
